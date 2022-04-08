@@ -1,0 +1,9 @@
+{
+	"Graph1":
+	{
+        "VertexCount": [4],
+		"Vertex": [1, 2, 3, 4],
+        "EdgeCount":[3],
+        "Edge":[[5,7],[2,3],[3,4]]
+	}
+}
