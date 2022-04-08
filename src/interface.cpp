@@ -3,7 +3,6 @@
 using json = nlohmann::json;
 
 VertexIdTracker * VertexIdTracker::vertexIdManager = nullptr;
-EdgeIdTracker * EdgeIdTracker::edgeIdManager = nullptr;
 
 VertexIdTracker::VertexIdTracker()
 {
@@ -44,45 +43,57 @@ long VertexIdTracker::GetLastGeneratedIdIndex()
     return p_vertexIdsUsedTill;
 }
 
-
-EdgeIdTracker::EdgeIdTracker()
+//!Vertex class
+Vertex::Vertex()
 {
-    p_edgeIdsUsedTill = 0;
+    p_dataVal = 0;
+    p_id = VertexIdTracker::getInstance()->FetchNewId();
 }
 
-EdgeIdTracker::~EdgeIdTracker()
+Vertex::Vertex(long value)
 {
-    //!Do nothing
+    p_dataVal = value;
+    p_id = VertexIdTracker::getInstance()->FetchNewId();
 }
 
-EdgeIdTracker * EdgeIdTracker::getInstance()
+long Vertex::GetDataValue()
 {
-    if(edgeIdManager == nullptr)
-    {
-        edgeIdManager = new EdgeIdTracker;
-    }
-    return edgeIdManager;
+    return p_dataVal;
 }
 
-void EdgeIdTracker::DestroyIdManager()
+
+Edge::Edge(long startVertexId, long endVertexId)
 {
-    if(edgeIdManager == nullptr)
-    {
-        delete edgeIdManager;
-        edgeIdManager = nullptr;
-    }
+    p_start_vertexId = startVertexId;
+    p_end_vertexId = endVertexId;
+    p_weight = 1;
 }
 
-long EdgeIdTracker::FetchNewId()
-{ 
-    p_edgeIdsUsedTill++;
-    return p_edgeIdsUsedTill;
-}
-
-long EdgeIdTracker::GetLastGeneratedIdIndex()
+Edge::Edge(long startVertexId, long endVertexId, double weight)
 {
-    return p_edgeIdsUsedTill;
+    p_start_vertexId = startVertexId;
+    p_end_vertexId = endVertexId;
+    p_weight = weight;
 }
+
+Graph::Graph()
+{
+
+}
+
+bool Graph::AddNodeInGraph(int uniqueNodeId, std::shared_ptr<Vertex> &node)
+{
+    p_table_uniqueNodeToVertex.insert({uniqueNodeId, node});
+    return true;
+}
+
+bool Graph::AddEdgeInGraph(std::shared_ptr<Edge> &edge)
+{
+    p_edges.push_back(edge);
+    return true;
+}
+
+
 
 bool AuxFxns::LoadGraphFromJason(const std::string &filename, std::vector<int> &vertices, std::vector<std::pair<int, int> > &edges)
 {
@@ -97,7 +108,7 @@ bool AuxFxns::LoadGraphFromJason(const std::string &filename, std::vector<int> &
 
     for(int i = 0; i < nodesCount; ++i)
     {
-        vertices.push_back(int(data["Graph1"]["Vertex"][0]));
+        vertices.push_back(int(data["Graph1"]["Vertex"][i]));
     }
 
     for(int i = 0; i < edgesCount; ++i)
@@ -105,6 +116,6 @@ bool AuxFxns::LoadGraphFromJason(const std::string &filename, std::vector<int> &
         int s = data["Graph1"]["Edge"][i][0];
         int e = data["Graph1"]["Edge"][i][1];
     }
-
     return true;
 }
+

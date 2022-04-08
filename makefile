@@ -24,4 +24,4 @@ bin/main.o: src/main.cpp
 
 $(EXECUTABLES): bin/interface.o bin/main.o
 	@echo Linking executable
-	g++ -g bin/interface.o bin/main.o -o main
+	g++ -std=c++17 -march=native -g bin/interface.o bin/main.o -o main
