@@ -31,16 +31,17 @@ int main()
     {
         std::shared_ptr<Vertex> newVertex =  std::make_shared<Vertex>(vertices[nodeIndex]);
         graph1.AddNodeInGraph(g_vidManager->GetLastGeneratedIdIndex(), newVertex);
-        table_dataValueToUniqueId.insert({newVertex->GetDataValue(),g_vidManager->GetLastGeneratedIdIndex()});
+        table_dataValueToUniqueId.insert({newVertex->getDataValue(),g_vidManager->GetLastGeneratedIdIndex()});
     }
-    //!Adding edges to the graph
+    //!Adding edges to the graph and stoding vertex neighbourhood
     for(int edgeIndex = 0; edgeIndex < edges.size(); ++edgeIndex)
     {
         std::shared_ptr<Edge> currEdge = std::make_shared<Edge>(table_dataValueToUniqueId[edges[edgeIndex].first],
                                                                     table_dataValueToUniqueId[edges[edgeIndex].second],
                                                                     1.);
-        graph1.AddEdgeInGraph(currEdge);
+        graph1.AddEdgeInGraph(currEdge); 
     }
+
 
 
 
