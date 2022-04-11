@@ -54,12 +54,12 @@ class Vertex
     //!Constructor
     Vertex();
     Vertex(long value);
-    long getDataValue();    
-    long getId();
+    long getDataValue(); 
+    long getId(); 
     std::vector<long> getOutNeighbours();
-    std::vector<long> getInNeighbours();
+    std::vector<long> getInNeighbours(); 
     long getOutDegree();
-    long getInDegree();
+    long getInDegree(); 
     void addOutDegree(long v); 
     void addInDegree(long v); 
 
@@ -113,8 +113,10 @@ class Graph
 class VertexSubset
 {
     public:
-    std::vector<long> getVertexSubset() const; // Done
-    long getVertexSubsetLength() const; //Done
+    std::vector<long> getVertexSubset() const; // Done: Tested
+    void setVertexSubset(std::vector<long> v); //Done: Tested
+    void printVertexSubset(); //Done: Tested
+    long getVertexSubsetLength() const; //Done: Tested
     long getVertexSubsetOutDegree(const Graph &graph) const; // TO DO: is it containing duplicates or the lenght of the set
     void addVertex(long vertex);// Done
     private:

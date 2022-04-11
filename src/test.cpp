@@ -77,6 +77,14 @@ int main(int argc, char** argv)
     //!Destroying the singlton objects
     g_vidManager->DestroyIdManager();
 
+    //Testing: Vertex subset functions
+    std::vector<long> a{4, 3, 2, 7};
+    VertexSubset s;
+    s.setVertexSubset(a);
+    s.printVertexSubset();
+    std::cout<<"Vertex Subset length:"<<s.getVertexSubsetLength()<<std::endl;
+    std::cout<<"Vertex Subset Outdegree:"<<s.getVertexSubsetOutDegree(graph)<<std::endl;
+
     std::cout << "Exited into main fxn" << std::endl;
 
     return 0;

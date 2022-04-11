@@ -6,7 +6,7 @@ using json = nlohmann::json;
 void PrintV::printVector(std::vector<long> v)
 {
     for(auto it = v.begin(); it < v.end(); it++)
-        std::cout<<*it - 1<<" ";
+        std::cout<<*it<<" ";
     
     std::cout<<std::endl;
 }
@@ -177,6 +177,20 @@ std::vector<long> VertexSubset::getVertexSubset() const
     return p_vertices;
 }
 
+void VertexSubset::setVertexSubset(std::vector<long> v)
+{
+    p_vertices.assign(v.begin(), v.end());
+}
+
+void VertexSubset::printVertexSubset()
+{    
+    std::cout<<"Vertex Subset:";
+    for(auto it = p_vertices.begin(); it < p_vertices.end(); it++)
+        std::cout<<*it<<" ";
+    
+    std::cout<<std::endl;
+}
+
 long VertexSubset::getVertexSubsetLength() const
 {
     return p_vertices.size();
@@ -284,7 +298,7 @@ VertexSubset Interface::EdgeMapDense(const Graph &graph,
 {
     VertexSubset Out;
     //std::vector<long>::iterator ngh;
-    //TO DO: Pparallel
+    //TO DO: Parallel
     // Vertex indexing starts from 1
     for(long i = 1; i <= graph.getNumberVertices(); i++)
         if (C(i) == 1)
