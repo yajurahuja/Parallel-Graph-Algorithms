@@ -3,6 +3,8 @@
 
 #include<string>
 #include <iostream>
+#include <stdlib.h>
+#include <string>
 #include <vector>
 #include <set>
 #include <fstream>
@@ -123,7 +125,7 @@ class VertexSubset
 class AuxFxns
 {
     public:
-    static bool LoadGraphFromJason(const std::string &filename, std::vector<int> &vertices, std::vector<std::pair<int, int> > &edges);
+    static bool LoadGraphFromJason(long graphNumber, const std::string &filename, std::vector<int> &vertices, std::vector<std::pair<int, int> > &edges);
 };
 
 class Interface

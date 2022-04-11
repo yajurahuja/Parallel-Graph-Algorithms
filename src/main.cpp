@@ -3,8 +3,9 @@
 
 
 
-int main()
+int main(int argc, char** argv)
 {
+    long graphNumber = strtol(argv[1], NULL, 10);
     std::cout << "Entered into main fxn" << std::endl;
 
 
@@ -14,7 +15,7 @@ int main()
     //This is for testing purposes.
     std::vector<int> vertices;
     std::vector<std::pair<int,int>> edges;
-    AuxFxns::LoadGraphFromJason(fileName, vertices, edges);
+    AuxFxns::LoadGraphFromJason(graphNumber, fileName, vertices, edges);
 
 
     //!Create objects of singlton classes
@@ -43,8 +44,8 @@ int main()
     }
 
 
-    //Testing: Graph 1ma
-    std::cout<<"Graph1 test"<<std::endl;
+    //Testing: Graph 1
+    std::cout<<"Graph test"<<std::endl;
     std::cout<<"Number of vertices:"<<graph1.getNumberVertices()<<std::endl;
     std::cout<<"Number of edges:"<<graph1.getNumberEdges()<<std::endl;
     

@@ -197,26 +197,30 @@ void VertexSubset::addVertex(long vertex)
 }
 
 
-bool AuxFxns::LoadGraphFromJason(const std::string &filename, std::vector<int> &vertices, std::vector<std::pair<int, int> > &edges)
+bool AuxFxns::LoadGraphFromJason(long graphNumber, const std::string &filename, std::vector<int> &vertices, std::vector<std::pair<int, int> > &edges)
 {
+    //Graph name
+    std::string name = "Graph";
+    name += std::to_string(graphNumber); 
+    std::cout<<"Loading "<<name<<std::endl;
 	// Load json data from scene file
 	json data;
 	std::ifstream in(filename);
 	in >> data;
 
     //!Count
-    long nodesCount = data["Graph1"]["VertexCount"][0];
-    long edgesCount = data["Graph1"]["EdgeCount"][0];
+    long nodesCount = data[name]["VertexCount"][0];
+    long edgesCount = data[name]["EdgeCount"][0];
 
     for(int i = 0; i < nodesCount; ++i)
     {
-        vertices.push_back(int(data["Graph1"]["Vertex"][i]));
+        vertices.push_back(int(data[name]["Vertex"][i]));
     }
 
     for(int i = 0; i < edgesCount; ++i)
     {
-        int s = data["Graph1"]["Edge"][i][0];
-        int e = data["Graph1"]["Edge"][i][1];
+        int s = data[name]["Edge"][i][0];
+        int e = data[name]["Edge"][i][1];
         edges.push_back(std::make_pair(s, e));
     }
     return true;

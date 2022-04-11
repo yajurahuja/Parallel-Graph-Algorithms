@@ -1,5 +1,5 @@
 TO DO:
 
-1) Complete the RemoveDuplicates function, Line 124
-2) Complete the getVertexSubsetOutDegree function, Line 107
-3) Test all the functions
+1) Update the Remove duplicate function
+2) Test all the functions
+3) Create test graphs for tesing functions
