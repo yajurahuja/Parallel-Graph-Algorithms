@@ -4,11 +4,20 @@
 #include<string>
 #include <iostream>
 #include <vector>
+#include <set>
 #include <fstream>
 #include <utility>
 #include <memory>
 #include <unordered_map>
 #include <functional>
+
+//printing functions
+
+class PrintV
+{
+    public:
+    static void printVector(std::vector<long> v);
+};
 
 //Data structures for the graph
 
@@ -46,20 +55,18 @@ class Vertex
     long getDataValue();    
     long getId();
     std::vector<long> getOutNeighbours();
-    std::vector<long> getInNieghbours();
-    long getOutNeighboursSize();
-    long getInNieghboursSize();
+    std::vector<long> getInNeighbours();
     long getOutDegree();
     long getInDegree();
-    void addOutDegree(long v); //TO DO
-    void addInDegree(long v); // TO DO
+    void addOutDegree(long v); 
+    void addInDegree(long v); 
 
     private:
     long p_id;      //!Identifier
 
     long p_dataVal; //!Data supplied as input
 
-    std::vector<long> InNieghbours; //vector storing all the vertex ids of the vertices which have an edge to this vertex
+    std::vector<long> InNeighbours; //vector storing all the vertex ids of the vertices which have an edge to this vertex
     std::vector<long> OutNeighbours; //vector storing all teh vertex ids of the vertices which have an edge from this vertex
 
 
@@ -89,7 +96,9 @@ class Graph
     bool AddEdgeInGraph(std::shared_ptr<Edge> &edge);//Done
     std::unordered_map<int, std::shared_ptr<Vertex> > getGraphTable(); //TO DO
     Vertex getVertex(long v) const;
+    Vertex* getVertexPointer(long v);
     long getNumberVertices() const;
+    long getNumberEdges() const;
 
 
     private:
@@ -104,7 +113,7 @@ class VertexSubset
     public:
     std::vector<long> getVertexSubset() const; // Done
     long getVertexSubsetLength() const; //Done
-    long getVertexSubsetOutDegree() const; // TO DO: is it containing duplicates or the lenght of the set
+    long getVertexSubsetOutDegree(const Graph &graph) const; // TO DO: is it containing duplicates or the lenght of the set
     void addVertex(long vertex);// Done
     private:
     std::vector<long> p_vertices;
@@ -120,6 +129,8 @@ class AuxFxns
 class Interface
 {
     public:
+
+    static std::set<long> convertToSet(std::vector<long> v);
 
     static void RemoveDuplicates(VertexSubset &U); //TO DO: This function removes the duplicates from a vector
 

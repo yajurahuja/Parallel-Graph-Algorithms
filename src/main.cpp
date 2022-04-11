@@ -43,8 +43,27 @@ int main()
     }
 
 
+    //Testing: Graph 1ma
+    std::cout<<"Graph1 test"<<std::endl;
+    std::cout<<"Number of vertices:"<<graph1.getNumberVertices()<<std::endl;
+    std::cout<<"Number of edges:"<<graph1.getNumberEdges()<<std::endl;
+    
+    for(int i = 1; i <= graph1.getNumberVertices(); i++)
+    {
+        std::cout<<graph1.getVertex(i).getId()<<" ";
+    }
+    std::cout<<std::endl;
+    for(int i = 1; i <= graph1.getNumberVertices(); i++)
+    {
+        Vertex v = graph1.getVertex(i);
+        std::cout<<"V ID:"<<v.getId() - 1<<std::endl;
+        std::cout<<"V Data:"<<v.getDataValue()<<std::endl;
+        std::cout<<"V Out Degree:"<<v.getOutDegree()<<std::endl;
+        PrintV::printVector(v.getOutNeighbours());
+        std::cout<<"V In Degree:"<<v.getInDegree()<<std::endl;
+        PrintV::printVector(v.getInNeighbours());
 
-
+    }
 
 
     //!Destroying the singlton objects

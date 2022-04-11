@@ -2,6 +2,15 @@
 #include "../ext/json.hpp"
 using json = nlohmann::json;
 
+
+void PrintV::printVector(std::vector<long> v)
+{
+    for(auto it = v.begin(); it < v.end(); it++)
+        std::cout<<*it - 1<<" ";
+    
+    std::cout<<std::endl;
+}
+
 VertexIdTracker * VertexIdTracker::vertexIdManager = nullptr;
 
 VertexIdTracker::VertexIdTracker()
@@ -70,9 +79,9 @@ std::vector<long> Vertex::getOutNeighbours()
 {
     return OutNeighbours;
 }
-std::vector<long> Vertex::getInNieghbours()
+std::vector<long> Vertex::getInNeighbours()
 {
-    return InNieghbours;
+    return InNeighbours;
 }
 
 long Vertex::getOutDegree()
@@ -81,17 +90,16 @@ long Vertex::getOutDegree()
 }
 long Vertex::getInDegree()
 {
-    return InNieghbours.size();
+    return InNeighbours.size();
 }
 
 void Vertex::addOutDegree(long v)
 {   
     OutNeighbours.push_back(v);
 }
-
 void Vertex::addInDegree(long v)
 {
-    InNieghbours.push_back(v);
+    InNeighbours.push_back(v);
 }
 
 Edge::Edge(long startVertexId, long endVertexId)
@@ -138,10 +146,10 @@ bool Graph::AddEdgeInGraph(std::shared_ptr<Edge> &edge) //Done
 {
     p_edges.push_back(edge);
     Edge e = *edge;
-    Vertex start = getVertex(e.getStartVertexId());
-    Vertex end = getVertex(e.getEndVertexId());
-    start.addOutDegree(end.getId());
-    end.addInDegree(start.getId());
+    Vertex *start = getVertexPointer(e.getStartVertexId());
+    Vertex *end = getVertexPointer(e.getEndVertexId());
+    start->addOutDegree(end->getId());
+    end->addInDegree(start->getId());
     return true;
 }
 
@@ -150,9 +158,18 @@ Vertex Graph::getVertex(long v) const
     return *p_table_uniqueNodeToVertex.at(v);
 }
 
+Vertex* Graph::getVertexPointer(long v)
+{
+    return p_table_uniqueNodeToVertex.at(v).get();
+}
+
 long Graph::getNumberVertices() const
 {
     return p_table_uniqueNodeToVertex.size();
+}
+long Graph::getNumberEdges() const
+{
+    return p_edges.size();
 }
 
 std::vector<long> VertexSubset::getVertexSubset() const
@@ -164,9 +181,13 @@ long VertexSubset::getVertexSubsetLength() const
 {
     return p_vertices.size();
 }
-long VertexSubset::getVertexSubsetOutDegree() const
+long VertexSubset::getVertexSubsetOutDegree(const Graph &graph) const
 {
-    return 0;
+    long total = 0;
+    //To DO: parallelize
+    for(auto v = p_vertices.begin(); v < p_vertices.end(); v++)
+        total += graph.getVertex(*v).getOutDegree();
+    return total;
 }
 
 
@@ -196,13 +217,23 @@ bool AuxFxns::LoadGraphFromJason(const std::string &filename, std::vector<int> &
     {
         int s = data["Graph1"]["Edge"][i][0];
         int e = data["Graph1"]["Edge"][i][1];
+        edges.push_back(std::make_pair(s, e));
     }
     return true;
 }
 
+std::set<long> Interface::convertToSet(std::vector<long> v)
+{
+    std::set<long> s;
+    for (auto x : v) 
+        s.insert(x);
+    return s;
+}
 
 void Interface::RemoveDuplicates(VertexSubset &U) //TO DO: This function removes the duplicates from a vector
 {
+    std::set<long> s = convertToSet(U.getVertexSubset());
+    U.getVertexSubset().assign(s.begin(), s.end());
     return;
 }
 
@@ -212,7 +243,7 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
                                 std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
                                 std::function<bool(long vertexIndex)> &C, long threshold)
 {
-    if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree() > threshold)
+    if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
         return EdgeMapDense(graph, U, F, C);
     else
         return EdgeMapSparse(graph, U, F, C);
@@ -253,7 +284,7 @@ VertexSubset Interface::EdgeMapDense(const Graph &graph,
     // Vertex indexing starts from 1
     for(long i = 1; i <= graph.getNumberVertices(); i++)
         if (C(i) == 1)
-            for(auto ngh = graph.getVertex(i).getInNieghbours().begin(); ngh < graph.getVertex(i).getInNieghbours().end(); ngh++)
+            for(auto ngh = graph.getVertex(i).getInNeighbours().begin(); ngh < graph.getVertex(i).getInNeighbours().end(); ngh++)
             {
                 if(std::find(U.getVertexSubset().begin(), U.getVertexSubset().end(), *ngh) != U.getVertexSubset().end() && F(*ngh, i) == 1)
                     Out.addVertex(i);
