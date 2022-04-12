@@ -84,6 +84,23 @@ std::vector<long> Vertex::getInNeighbours()
     return InNeighbours;
 }
 
+std::vector<long>::const_iterator Vertex::getOutNeighboursBegin() const
+{
+    return OutNeighbours.begin();
+}
+std::vector<long>::const_iterator Vertex::getOutNeighboursEnd() const
+{
+    return OutNeighbours.end();
+}
+std::vector<long>::const_iterator Vertex::getInNeighboursBegin() const
+{
+    return InNeighbours.begin();
+}
+std::vector<long>::const_iterator Vertex::getInNeighboursEnd() const
+{
+    return InNeighbours.end();
+}
+
 long Vertex::getOutDegree()
 {
     return OutNeighbours.size();
@@ -158,7 +175,7 @@ Vertex Graph::getVertex(long v) const
     return *p_table_uniqueNodeToVertex.at(v);
 }
 
-Vertex* Graph::getVertexPointer(long v)
+Vertex* Graph::getVertexPointer(long v) const
 {
     return p_table_uniqueNodeToVertex.at(v).get();
 }
@@ -175,6 +192,15 @@ long Graph::getNumberEdges() const
 std::vector<long> VertexSubset::getVertexSubset() const
 {
     return p_vertices;
+}
+
+std::vector<long>::const_iterator VertexSubset::getVertexSubsetBegin() const
+{
+    return p_vertices.begin();
+}
+std::vector<long>::const_iterator VertexSubset::getVertexSubsetEnd() const
+{
+    return p_vertices.end();
 }
 
 void VertexSubset::setVertexSubset(std::vector<long> v)
@@ -258,8 +284,8 @@ void Interface::RemoveDuplicates(VertexSubset &U) //TO DO: This function removes
 
 VertexSubset Interface::EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C, long threshold)
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C, long threshold)
 {
     if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
         return EdgeMapDense(graph, U, F, C);
@@ -267,22 +293,25 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
         return EdgeMapSparse(graph, U, F, C);
 }
 
+
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C)
 {
     VertexSubset Out; 
-    //std::vector<long>::iterator v;
-    //std::vector<long>::iterator ngh;
     //TO DO: parallel
-    for(auto v = U.getVertexSubset().begin(); v < U.getVertexSubset().end(); v++)
+    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
     {
-        Vertex v_ = graph.getVertex(*v);
+        Vertex* v_ = graph.getVertexPointer(*v);
         //TO DO: parallel
-        for(auto ngh = v_.getOutNeighbours().begin(); ngh < v_.getOutNeighbours().end(); ngh++)
-            if(C(*ngh) == 1 && F(*v, *ngh) == 1)
+        for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
+        {
+            if(C(*ngh) && F(*v, *ngh))
+            {
                 Out.addVertex(*ngh);
+            }    
+        }
     }
     RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
     return Out;
@@ -293,55 +322,63 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 
 VertexSubset Interface::EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C)
 {
     VertexSubset Out;
-    //std::vector<long>::iterator ngh;
     //TO DO: Parallel
     // Vertex indexing starts from 1
     for(long i = 1; i <= graph.getNumberVertices(); i++)
+    {
+        Vertex* v = graph.getVertexPointer(i);
         if (C(i) == 1)
-            for(auto ngh = graph.getVertex(i).getInNeighbours().begin(); ngh < graph.getVertex(i).getInNeighbours().end(); ngh++)
+            for(auto ngh = v->getInNeighboursBegin(); ngh < v->getInNeighboursEnd(); ngh++)
             {
-                if(std::find(U.getVertexSubset().begin(), U.getVertexSubset().end(), *ngh) != U.getVertexSubset().end() && F(*ngh, i) == 1)
+                if(std::find(U.getVertexSubsetBegin(), U.getVertexSubsetEnd(), *ngh) != U.getVertexSubsetEnd() && F(*ngh, i))
                     Out.addVertex(i);
                 if(C(i) == 0)
                     break;
 
             }
+    }
     return Out;
     
 }
 
-VertexSubset EdgeMapDenseWrite(const Graph &graph,
+VertexSubset Interface::EdgeMapDenseWrite(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C)
 {
     VertexSubset Out;
-    //std::vector<long>::iterator ngh;
     // TO DO: parallel
     for(long i = 1; i <= graph.getNumberVertices(); i++)
-        if(std::find(U.getVertexSubset().begin(), U.getVertexSubset().end(), i) != U.getVertexSubset().end())
+    {
+
+        if(std::find(U.getVertexSubsetBegin(), U.getVertexSubsetEnd(), i) != U.getVertexSubsetEnd())
         {
             //TO DO: parallel
-            for(auto ngh = graph.getVertex(i).getOutNeighbours().begin(); ngh < graph.getVertex(i).getOutNeighbours().end(); ngh++)
-                if(C(*ngh) == 1 && F(i, *ngh) == 1)
+            Vertex* v = graph.getVertexPointer(i);
+            for(auto ngh = v->getOutNeighboursBegin(); ngh < v->getOutNeighboursEnd(); ngh++)
+            {
+                if(C(*ngh) && F(i, *ngh))
                     Out.addVertex(*ngh);  
+            }
         }
+    }
     return Out;
-
 }
 
 VertexSubset Interface::VertexMap(const VertexSubset &U, 
-                                         std::function<bool(long vertexIndex)> &F)
+                                         const std::function<bool(long vertexIndex)> &F)
 {
     VertexSubset Out;
     //TO DO: parallel
-    for(auto v = U.getVertexSubset().begin(); v < U.getVertexSubset().end(); v++)
+    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+    {
         if(F(*v))
             Out.addVertex(*v);
-    
+    }
+    std::cout<<std::endl;
     return Out;
 }   

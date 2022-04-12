@@ -1,7 +1,8 @@
 #include "../headers/interface.h"
 #include <filesystem>
 
-
+bool OddEven(long vertex); //Interface functions
+bool OddEven_(long v1Id, long v2Id); // Interface functions
 
 int main(int argc, char** argv)
 {
@@ -75,17 +76,50 @@ int main(int argc, char** argv)
 
 
     //!Destroying the singlton objects
-    g_vidManager->DestroyIdManager();
+    
 
     //Testing: Vertex subset functions
-    std::vector<long> a{4, 3, 2, 7};
-    VertexSubset s;
-    s.setVertexSubset(a);
-    s.printVertexSubset();
-    std::cout<<"Vertex Subset length:"<<s.getVertexSubsetLength()<<std::endl;
-    std::cout<<"Vertex Subset Outdegree:"<<s.getVertexSubsetOutDegree(graph)<<std::endl;
+    std::vector<long> a{4, 3, 2};
+    VertexSubset s_;
+    s_.setVertexSubset(a);
+    s_.printVertexSubset();
+    std::cout<<"Vertex Subset length:"<<s_.getVertexSubsetLength()<<std::endl;
+    std::cout<<"Vertex Subset Outdegree:"<<s_.getVertexSubsetOutDegree(graph)<<std::endl;
+
+
+    //Testing: VertexMap
+    VertexSubset o = Interface::VertexMap(s_, &OddEven);
+    o.printVertexSubset();
+
+    //Testing EdgeMapSparse
+    s_.printVertexSubset();
+    VertexSubset o = Interface::EdgeMapSparse(graph, s_, &OddEven_, &OddEven);
+    o.printVertexSubset();
+
+    //Testing: EdgeMapDense and EdgeMapDenseWrite
+
+    //Testing EdgeMapDense
+    s_.printVertexSubset();
+    VertexSubset o = Interface::EdgeMapDenseWrite(graph, s_, &OddEven_, &OddEven);
+    o.printVertexSubset();
+
+
 
     std::cout << "Exited into main fxn" << std::endl;
-
+    g_vidManager->DestroyIdManager();
     return 0;
+}
+
+bool OddEven(long vertexId)
+{
+    if(vertexId % 2 == 1)
+        return true;
+    return false;
+}
+
+bool OddEven_(long v1Id, long v2Id)
+{
+    if((v1Id + v2Id) % 2 == 1)
+        return true;
+    return false;
 }

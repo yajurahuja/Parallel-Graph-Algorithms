@@ -58,6 +58,10 @@ class Vertex
     long getId(); 
     std::vector<long> getOutNeighbours();
     std::vector<long> getInNeighbours(); 
+    std::vector<long>::const_iterator getOutNeighboursBegin() const;
+    std::vector<long>::const_iterator getOutNeighboursEnd() const;
+    std::vector<long>::const_iterator getInNeighboursBegin() const;
+    std::vector<long>::const_iterator getInNeighboursEnd() const;
     long getOutDegree();
     long getInDegree(); 
     void addOutDegree(long v); 
@@ -98,7 +102,7 @@ class Graph
     bool AddEdgeInGraph(std::shared_ptr<Edge> &edge);//Done
     std::unordered_map<int, std::shared_ptr<Vertex> > getGraphTable(); //TO DO
     Vertex getVertex(long v) const;
-    Vertex* getVertexPointer(long v);
+    Vertex* getVertexPointer(long v) const;
     long getNumberVertices() const;
     long getNumberEdges() const;
 
@@ -113,10 +117,12 @@ class Graph
 class VertexSubset
 {
     public:
-    std::vector<long> getVertexSubset() const; // Done: Tested
+    std::vector<long> getVertexSubset() const; // Done: Not Required!
+    std::vector<long>::const_iterator getVertexSubsetBegin() const; //Done: Tested
+    std::vector<long>::const_iterator getVertexSubsetEnd() const; //Done: Tested
     void setVertexSubset(std::vector<long> v); //Done: Tested
     void printVertexSubset(); //Done: Tested
-    long getVertexSubsetLength() const; //Done: Tested
+    long getVertexSubsetLength() const; //Done
     long getVertexSubsetOutDegree(const Graph &graph) const; // TO DO: is it containing duplicates or the lenght of the set
     void addVertex(long vertex);// Done
     private:
@@ -140,28 +146,28 @@ class Interface
 
     static VertexSubset EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C, long threshold); //Done
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C, long threshold); //Done : Tested
 
     static VertexSubset VertexMap(const VertexSubset &U, 
-                                         std::function<bool(long vertexIndex)> &F); //Done
+                                        const std::function<bool(long vertexIndex)> &F); //Done : Tested
 
-    private: 
+    //private: 
 
     static VertexSubset EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C); //Done
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
 
     static VertexSubset EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C); //Done
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
 
     static VertexSubset EdgeMapDenseWrite(const Graph &graph,
                                 const VertexSubset &U,
-                                std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                std::function<bool(long vertexIndex)> &C); //Done
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
 
 };
 
