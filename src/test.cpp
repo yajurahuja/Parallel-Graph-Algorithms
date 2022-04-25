@@ -1,125 +1,206 @@
-#include "../headers/interface.h"
+#include "../headers/allHeaders.h"
+
 #include <filesystem>
-
-bool OddEven(long vertex); //Interface functions
-bool OddEven_(long v1Id, long v2Id); // Interface functions
-
-int main(int argc, char** argv)
-{
-    long graphNumber = strtol(argv[1], NULL, 10);
-    std::cout << "Entered into main fxn" << std::endl;
-
-
-    //!Getting the current path
-    auto currPath = std::filesystem::current_path().string();
-    std::string fileName = currPath + std::string("/test/tempGraph.json");
-    //This is for testing purposes.
-    std::vector<int> vertices;
-    std::vector<std::pair<int,int>> edges;
-    AuxFxns::LoadGraphFromJason(graphNumber, fileName, vertices, edges);
-
-
-    //!Create objects of singlton classes
-    //!These will ensure unique id, make sure to destroy them at the end
-    VertexIdTracker * g_vidManager = VertexIdTracker::getInstance();
-
-
-    Graph graph;
-
-    //!Hash table fetching node id from node value
-    std::unordered_map<int, int> table_dataValueToUniqueId;
-    //!Adding vertices to the graph
-    for(int nodeIndex = 0; nodeIndex < vertices.size(); ++nodeIndex)
-    {
-        std::shared_ptr<Vertex> newVertex =  std::make_shared<Vertex>(vertices[nodeIndex]);
-        graph.AddNodeInGraph(g_vidManager->GetLastGeneratedIdIndex(), newVertex);
-        table_dataValueToUniqueId.insert({newVertex->getDataValue(),g_vidManager->GetLastGeneratedIdIndex()});
-    }
-    //!Adding edges to the graph and stoding vertex neighbourhood
-    for(int edgeIndex = 0; edgeIndex < edges.size(); ++edgeIndex)
-    {
-        std::shared_ptr<Edge> currEdge = std::make_shared<Edge>(table_dataValueToUniqueId[edges[edgeIndex].first],
-                                                                    table_dataValueToUniqueId[edges[edgeIndex].second],
-                                                                    1.);
-        graph.AddEdgeInGraph(currEdge); 
-    }
-
-
-    //Testing: Graph Creation
-    std::cout<<"Graph Creation"<<std::endl;
-    std::cout<<"Number of vertices:"<<graph.getNumberVertices()<<std::endl;
-    std::cout<<"Number of edges:"<<graph.getNumberEdges()<<std::endl;
-    
-    for(int i = 1; i <= graph.getNumberVertices(); i++)
-    {
-        std::cout<<graph.getVertex(i).getId()<<" ";
-    }
-    std::cout<<std::endl;
-    for(int i = 1; i <= graph.getNumberVertices(); i++)
-    {
-        Vertex v = graph.getVertex(i);
-        std::cout<<"V ID:"<<v.getId() - 1<<std::endl;
-        std::cout<<"V Data:"<<v.getDataValue()<<std::endl;
-        std::cout<<"V Out Degree:"<<v.getOutDegree()<<std::endl;
-        PrintV::printVector(v.getOutNeighbours());
-        std::cout<<"V In Degree:"<<v.getInDegree()<<std::endl;
-        PrintV::printVector(v.getInNeighbours());
-
-    }
-
-    //Testing: Remove function
-    std::vector<long> v = {1, 2, 3, 4, 5, 1, 2, 7, 8, 8};
-    PrintV::printVector(v);
-    std::set<long> s = Interface::convertToSet(v);
-    v.assign(s.begin(), s.end());
-    PrintV::printVector(v);
-
-
-    //!Destroying the singlton objects
-    
-
-    //Testing: Vertex subset functions
-    std::vector<long> a{4, 3, 2};
-    VertexSubset s_;
-    s_.setVertexSubset(a);
-    s_.printVertexSubset();
-    std::cout<<"Vertex Subset length:"<<s_.getVertexSubsetLength()<<std::endl;
-    std::cout<<"Vertex Subset Outdegree:"<<s_.getVertexSubsetOutDegree(graph)<<std::endl;
-
-
-    //Testing: VertexMap
-    VertexSubset o = Interface::VertexMap(s_, &OddEven);
-    o.printVertexSubset();
-
-    //Testing EdgeMapSparse
-    s_.printVertexSubset();
-    VertexSubset o = Interface::EdgeMapSparse(graph, s_, &OddEven_, &OddEven);
-    o.printVertexSubset();
-
-    //Testing: EdgeMapDense and EdgeMapDenseWrite
-
-    //Testing EdgeMapDense
-    s_.printVertexSubset();
-    VertexSubset o = Interface::EdgeMapDenseWrite(graph, s_, &OddEven_, &OddEven);
-    o.printVertexSubset();
+#include <cmath>
 
 
 
-    std::cout << "Exited into main fxn" << std::endl;
-    g_vidManager->DestroyIdManager();
-    return 0;
-}
+// bool Test::FxnOddEven(long vertexId)
+// {
+//     if(vertexId % 2 == 1)
+//         return true;
+//     return false;
+// }
+
+// bool Test::FxnOddEven_(long v1Id, long v2Id)
+// {
+//     if((v1Id + v2Id) % 2 == 1)
+//         return true;
+//     return false;
+// }
 
 bool OddEven(long vertexId)
 {
-    if(vertexId % 2 == 1)
+    if(vertexId % 2 == 1)      //!! Should be odd, then only true
         return true;
     return false;
+//    return true;
 }
 
 bool OddEven_(long v1Id, long v2Id)
 {
-    if((v1Id + v2Id) % 2 == 1)
+    if((v1Id + v2Id) % 2 == 1) //!Sum should be odd, then only true
         return true;
     return false;
+//    return true;
+}
+
+
+std::vector<long> Test::GenerateRandomIntegers(long minInteger, 
+                                               long maxInteger, 
+                                               long totalNumbers)
+{
+    srand(100);  //Changed from rand(). srand() seeds rand for you.
+
+    std::vector<long> retV;
+    for(long i = 0; i < totalNumbers; ++i)
+        retV.emplace_back(rand() % maxInteger + minInteger);
+
+    return retV;
+}    
+
+void Test::TestVertexSubset(Graph &g,
+                      VertexSubset &vs,
+                      long nodesCountInSubset,
+                      std::string &logFile)
+{
+    std::fstream fileStream(logFile, std::ios::app);
+
+    //fileStream << "Beginning the test vertex subset function" << std::endl;
+
+    //!Set this vertex subset
+    std::vector<long> subsetIds = GenerateRandomIntegers(0,
+                                               g.getNumberVertices(),
+                                               nodesCountInSubset);
+
+    std::sort(subsetIds.begin(), subsetIds.end());
+    subsetIds.erase(std::unique(subsetIds.begin(), subsetIds.end()), subsetIds.end());
+
+    vs.setVertexSubset(subsetIds);
+    fileStream << "Number of vertices: "<< vs.getVertexSubsetLength() << " | Outdegree: " << vs.getVertexSubsetOutDegree(g) << std::endl;
+    //fileStream << "Below is the input vector subset:" << std::endl;
+    vs.LogIntoFile(fileStream);
+
+    VertexSubset o = Interface::VertexMap(vs, &OddEven);
+    VertexSubset o1 = Interface::EdgeMapSparse(g, vs, &OddEven_, &OddEven);
+    VertexSubset o2 = Interface::EdgeMapDenseWrite(g, vs, &OddEven_, &OddEven);
+    //!Error between edge map sparse and edge map dense should be zero
+    bool thereIsAnError = false;
+    if(o1.getVertexSubsetLength() != o2.getVertexSubsetLength())
+    {
+        //!If length is different, flag this error
+        fileStream << "Different sizes generated by edgeMapSparse and edgeMapDense" << std::endl;
+        thereIsAnError = true;
+    }
+    else
+    {
+        for(size_t i = 0; i < o1.getVertexSubsetLength(); ++i)
+        {
+            long error = o1.getVertexSubset()[i] - o2.getVertexSubset()[i];
+            if(error != 0)
+            {
+                fileStream << "Different subsets generated by edgeMapSparse and edgeMapDense" << std::endl;
+                thereIsAnError = true;
+                break;
+            }   
+        }
+    }
+    fileStream << " " << std::endl;
+    fileStream << " " << std::endl;    
+//     //Testing: VertexMap
+//     //std::cout << "Vertex Map Function output: " << std::endl;
+//     VertexSubset o = Interface::VertexMap(vs, &OddEven);
+//     //o.printVertexSubset();
+//     //std::cout << "After calling Vertex Map Function" << std::endl;
+
+//     //Testing EdgeMapSparse
+// //    std::cout << "Before calling Edge Map Sparse Function" << std::endl;
+//     VertexSubset o1 = Interface::EdgeMapSparse(g, vs, &OddEven_, &OddEven);
+// //    o1.printVertexSubset();
+// //    std::cout << "After calling Edge Map Sparse Function" << std::endl;
+
+//     //Testing EdgeMapDense
+// //    std::cout << "Before calling Edge Map Dense Function" << std::endl;
+//     VertexSubset o2 = Interface::EdgeMapDenseWrite(g, vs, &OddEven_, &OddEven);
+// //    o2.printVertexSubset();
+// //    std::cout << "After calling Edge Map Dense Function" << std::endl;
+
+//     //!Error between edge map sparse and edge map dense should be zero
+//     bool thereIsAnError = false;
+//     if(o1.getVertexSubsetLength() != o2.getVertexSubsetLength())
+//     {
+//         //!If length is different, flag this error
+//         thereIsAnError = true;
+//     }
+//     if(thereIsAnError == true)
+//     {
+//         std::cout << "Error Present" << std::endl;
+//     }
+
+//     for(size_t i = 0; i < o1.getVertexSubsetLength(); ++i)
+//     {
+//         long error = o1.getVertexSubset()[i] - o2.getVertexSubset()[i];
+//         if(error != 0)
+//         {
+//             thereIsAnError = true;
+//             break;
+//         }   
+//     }
+
+//     if(thereIsAnError == true)
+//     {
+//         std::cout << "Error Present" << std::endl;
+//     }
+
+//     std::cout << std::endl;
+//     std::cout << std::endl;
+}
+
+void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
+{
+    long verticesCount = currGraph.getNumberVertices();
+
+    std::vector<long> individualSubsetSizes;
+    for(int i = 1; i <= 10; ++i)
+    {
+        long subSetSize = std::ceil(verticesCount * i * 10./100);
+        individualSubsetSizes.push_back(subSetSize);
+    }
+    individualSubsetSizes.erase(std::unique(individualSubsetSizes.begin(), individualSubsetSizes.end()), individualSubsetSizes.end());
+
+    for(auto &subSetSize : individualSubsetSizes)
+    {
+        VertexSubset vs;
+
+        std::fstream fileStream(logFile, std::ios::app);
+        //fileStream << "Beginning of the testing on this graph function" << std::endl;
+        fileStream << " " << std::endl;
+        //fileStream << "Percentage of nodes selected for subset: "  << i * 10 << "%" <<std::endl;
+
+        TestVertexSubset(currGraph,
+                         vs,
+                         subSetSize,
+                         logFile);
+
+        //fileStream << "Ending of the testing on this graph function" << std::endl;
+        fileStream << " " << std::endl;
+
+    }
+}
+
+bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s)
+{
+    for(long i = 0; i < layers.size(); i++)
+    {
+        if(layers[i] != layers_s[i])
+        {
+            std::cout<<"Layers MisMatch at vertex"<<i<<std::endl;
+            return false;
+        }
+           
+    }
+    std::cout<<"Layers Match!"<<std::endl;
+    return true;
+}
+
+void Test::TestBFS(Graph& currGraph, long root)
+{
+    extern std::deque<std::atomic<long>> parents;
+    extern std::deque<std::atomic<long>> layers;
+    extern std::deque<long> parents_s;
+    extern std::deque<long> layers_s;
+
+    bfs_s(currGraph, root);
+    bfs(currGraph, root);
+    CompareLayers(layers, layers_s);
 }

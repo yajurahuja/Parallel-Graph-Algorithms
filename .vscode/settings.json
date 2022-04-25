@@ -73,6 +73,17 @@
         "algorithm": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "codecvt": "cpp",
+        "condition_variable": "cpp",
+        "numbers": "cpp",
+        "queue": "cpp",
+        "random": "cpp",
+        "semaphore": "cpp",
+        "set": "cpp",
+        "thread": "cpp",
+        "*.tcc": "cpp",
+        "memory_resource": "cpp",
+        "stop_token": "cpp"
     }
 }

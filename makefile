@@ -1,27 +1,24 @@
-# #First version, hence hardcoded the path, have to make this generic
-.PHONY: all clean
+CC := g++-11
+CXXFLAGS := -std=c++17 -march=native -g
+EXECUTABLES := main
 
-EXECUTABLES = main
+SRC_DIR := src
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 
-COMPILER = g++
-CPP=FILES.cpp
+HEADERS_DIR := headers
+HEADERS := $(wildcard $(HEADERS_DIR)/*.h)
+
+
+OBJS_DIR := bin
+OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 
 all: $(EXECUTABLES)
 
+$(EXECUTABLES): $(OBJS)
+	$(CC) $(CXXFLAGS) -o $@ $^
+
+$(OBJS_DIR)/%.o : $(SRC_DIR)/%.cpp
+	$(CC) $(CXXFLAGS) -c -o $@ $<
 clean:
-	@echo Delete .obj files
-	rm -f bin/interface.o bin/main.o
-	@echo Delete exe file
-	rm -rf $(EXECUTABLES)
-
-bin/interface.o: src/interface.cpp
-	@echo Compiling interface
-	g++ -c -std=c++17 -march=native -g src/interface.cpp -o bin/interface.o
-
-bin/main.o: src/main.cpp
-	@echo Compiling main
-	g++ -c -std=c++17 -march=native -g	src/main.cpp -o bin/main.o
-
-$(EXECUTABLES): bin/interface.o bin/main.o
-	@echo Linking executable
-	g++ -std=c++17 -march=native -g bin/interface.o bin/main.o -o main
+	rm -rf $(EXECUTABLES) $(OBJS)	
+.PHONY: all clean
