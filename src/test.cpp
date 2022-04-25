@@ -71,9 +71,13 @@ void Test::TestVertexSubset(Graph &g,
     //fileStream << "Below is the input vector subset:" << std::endl;
     vs.LogIntoFile(fileStream);
 
-    VertexSubset o = Interface::VertexMap(vs, &OddEven);
-    VertexSubset o1 = Interface::EdgeMapSparse(g, vs, &OddEven_, &OddEven);
+    //VertexSubset o = Interface::VertexMap(vs, &OddEven);
     VertexSubset o2 = Interface::EdgeMapDenseWrite(g, vs, &OddEven_, &OddEven);
+
+    std::cout << "Dense Done" << std::endl;
+    VertexSubset o1 = Interface::EdgeMapSparse(g, vs, &OddEven_, &OddEven);
+    std::cout << "Sparse Done" << std::endl;
+
     //!Error between edge map sparse and edge map dense should be zero
     bool thereIsAnError = false;
     if(o1.getVertexSubsetLength() != o2.getVertexSubsetLength())
@@ -148,6 +152,7 @@ void Test::TestVertexSubset(Graph &g,
 
 void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
 {
+    std::cout << "Reached Here 3" << std::endl;
     long verticesCount = currGraph.getNumberVertices();
 
     std::vector<long> individualSubsetSizes;
@@ -158,24 +163,36 @@ void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
     }
     individualSubsetSizes.erase(std::unique(individualSubsetSizes.begin(), individualSubsetSizes.end()), individualSubsetSizes.end());
 
-    for(auto &subSetSize : individualSubsetSizes)
+    // std::cout << "Running Seq" << std::endl;
+    // bfs_s(currGraph,0);
+    // std::cout << "Running Parallel" << std::endl;
+    // bfs(currGraph,0);
+    for(int i = 0; i < verticesCount; ++i)
     {
-        VertexSubset vs;
-
-        std::fstream fileStream(logFile, std::ios::app);
-        //fileStream << "Beginning of the testing on this graph function" << std::endl;
-        fileStream << " " << std::endl;
-        //fileStream << "Percentage of nodes selected for subset: "  << i * 10 << "%" <<std::endl;
-
-        TestVertexSubset(currGraph,
-                         vs,
-                         subSetSize,
-                         logFile);
-
-        //fileStream << "Ending of the testing on this graph function" << std::endl;
-        fileStream << " " << std::endl;
-
+//        std::cout << "New Call" << " Root: " << i << std::endl;
+        TestBFS(currGraph,i);
+//        std::cout << "   " << std::endl;        
     }
+
+
+    // for(auto &subSetSize : individualSubsetSizes)
+    // {
+    //     VertexSubset vs;
+
+    //     std::fstream fileStream(logFile, std::ios::app);
+    //     //fileStream << "Beginning of the testing on this graph function" << std::endl;
+    //     fileStream << " " << std::endl;
+    //     //fileStream << "Percentage of nodes selected for subset: "  << i * 10 << "%" <<std::endl;
+
+    //     TestVertexSubset(currGraph,
+    //                      vs,
+    //                      subSetSize,
+    //                      logFile);
+
+    //     //fileStream << "Ending of the testing on this graph function" << std::endl;
+    //     fileStream << " " << std::endl;
+    //     //break;
+    // }
 }
 
 bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s)
@@ -185,11 +202,12 @@ bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long>
         if(layers[i] != layers_s[i])
         {
             std::cout<<"Layers MisMatch at vertex"<<i<<std::endl;
+            
             return false;
         }
            
     }
-    std::cout<<"Layers Match!"<<std::endl;
+    //std::cout<<"Layers Match!"<<std::endl;
     return true;
 }
 
@@ -200,7 +218,7 @@ void Test::TestBFS(Graph& currGraph, long root)
     extern std::deque<long> parents_s;
     extern std::deque<long> layers_s;
 
-    bfs_s(currGraph, root);
+    //bfs_s(currGraph, root);
     bfs(currGraph, root);
-    CompareLayers(layers, layers_s);
+    //CompareLayers(layers, layers_s);
 }

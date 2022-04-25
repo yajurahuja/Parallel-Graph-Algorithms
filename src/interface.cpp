@@ -1,6 +1,7 @@
 #include "../headers/allHeaders.h"
 #include <algorithm>
 
+
 std::set<long> Interface::convertToSet(std::vector<long> &v)
 {
     v.erase(std::unique(v.begin(), v.end()), v.end());
@@ -28,9 +29,9 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
                                 const std::function<bool(long vertexIndex)> &C, long threshold)
 {
-    if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
-        return EdgeMapDense(graph, U, F, C);
-    else
+    // if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
+    //     return EdgeMapDense(graph, U, F, C);
+    // else
         return EdgeMapSparse(graph, U, F, C);
 }
 
@@ -42,6 +43,34 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 {
     VertexSubset Out; 
     //TO DO: parallel
+    #pragma omp parallel
+    {
+        //#pragma omp parallel for
+        #pragma omp single nowait
+        {
+            for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+            {
+                Vertex* v_ = graph.getVertexPointer(*v);
+                //TO DO: parallel
+                
+                //#pragma omp parallel for
+                for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
+                {
+                     #pragma omp task
+                    {
+                        if(C(*ngh) && F(*v, *ngh))
+                        {
+                            Out.addVertex(*ngh);
+                        } 
+                    } 
+                }
+
+            }
+        }
+        
+
+
+    }
     for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
     {
         Vertex* v_ = graph.getVertexPointer(*v);
@@ -70,7 +99,6 @@ VertexSubset Interface::EdgeMapDense(const Graph &graph,
 {
     VertexSubset Out;
     //TO DO: Parallel
-    // Vertex indexing starts from 1
     for(long i = 0; i < graph.getNumberVertices(); i++)
     {
         Vertex* v = graph.getVertexPointer(i);
@@ -118,12 +146,24 @@ VertexSubset Interface::VertexMap(const VertexSubset &U,
                                   const std::function<bool(long vertexIndex)> &F)
 {
     VertexSubset Out;
-    //TO DO: parallel
-    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+    //TO DO: parallel: Method 1: without critical section
+    #pragma omp parallel
     {
-        if(F(*v))
-            Out.addVertex(*v);
+        #pragma omp single nowait
+        {
+            for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+            {
+                #pragma omp task
+                {
+                    if(F(*v))
+                        Out.addVertex(*v);
+                }
+
+            }
+        }
+
     }
+
     //std::cout<<std::endl;
     return Out;
 }   

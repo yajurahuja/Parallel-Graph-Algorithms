@@ -1,5 +1,5 @@
 CC := g++-11
-CXXFLAGS := -std=c++17 -march=native -g
+CXXFLAGS := -std=c++17 -march=native -g -fopenmp
 EXECUTABLES := main
 
 SRC_DIR := src

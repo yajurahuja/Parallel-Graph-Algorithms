@@ -3,8 +3,8 @@
 
 
 //BFS
-std::deque<std::atomic<long>> parents;
-std::deque<std::atomic<long>> layers;
+std::deque<long> parents;
+std::deque<long> layers;
 
 //BFS Sequential
 std::deque<long> parents_s;
@@ -49,21 +49,38 @@ void bfs_s(const Graph &graph, long root)
         }
 	}
 
-	std::cout<<"Sequential"<<std::endl;
-	for(int i = 0; i < size; i++)  
-		std::cout<<i<<": "<<"PARENT "<<parents_s[i]<<" LAYER "<<layers_s[i]<<std::endl;
+	// std::cout<<"Sequential"<<std::endl;
+	// for(int i = 0; i < size; i++)  
+	// 	std::cout<<i<<": "<<"PARENT "<<parents_s[i]<<" LAYER "<<layers_s[i]<<std::endl;
 }
 
 
 bool update(long v, long ind)
 {
 	long old = -1;
-	auto ret = parents[ind].compare_exchange_strong(old, v);
+	bool ret;
+	#pragma omp critical
+	{
+		if (parents[ind] == old)
+		{
+			parents[ind] = v;
+			ret = true;
+		}
+		else
+			ret = false;
+	}
+	
 	return ret;
 }
-bool cond(long ind)
-{
-	return (parents[ind] == -1);
+
+bool cond(long ind) 
+{	
+	bool result;
+	#pragma omp critical
+	{
+		result = (parents[ind] == -1);
+	}
+	return result;
 }
 void bfs(const Graph &graph, long root)
 {
@@ -80,16 +97,25 @@ void bfs(const Graph &graph, long root)
     parents[root] = root; //set the root's parent to itself
 	layers[root] = 0; //set the layer of root to 0
 	VertexSubset frontier(root);
+	long layer = 1;
 	while(frontier.getVertexSubsetLength() > 0)
 	{
 		frontier = Interface::EdgeMap(graph, frontier, &update, &cond, threshhold);
 		//TO DO: parallel
 		for(auto v = frontier.getVertexSubsetBegin(); v < frontier.getVertexSubsetEnd(); v++)
-			layers[*v] = layers[parents[*v]].load() + 1;
+			layers[*v] = layers[parents[*v]] + 1;
+		
+		//std::cout<<"iteration "<<layer<<":"<<std::endl;
+		// for(long i = 0; i < layers.size(); i++)
+		// {
+		// 	std::cout<<i<<":"<<layers[i]<<" ";
+		// }
+		//std::cout<<std::endl;
+		layer += 1;
 	}
-    std::cout<<"Parallel:"<<std::endl;
-    for(int i = 0; i < size; i++)  
-        std::cout<<i<<": "<<"PARENT "<<parents[i]<<" LAYER "<<layers[i]<<std::endl;
+    // std::cout<<"Parallel:"<<std::endl;
+    // for(int i = 0; i < size; i++)  
+    //     std::cout<<i<<": "<<"PARENT "<<parents[i]<<" LAYER "<<layers[i]<<std::endl;
 	return;
 }
 

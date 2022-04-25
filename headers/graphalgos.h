@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <deque>
+#include <omp.h> 
 
 class Graph;
 //Sequential BFS
