@@ -43,46 +43,23 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 {
     VertexSubset Out; 
     //TO DO: parallel
-    #pragma omp parallel
-    {
-        //#pragma omp parallel for
-        #pragma omp single nowait
-        {
-            for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+        
+            for(long v = 0; v < U.getVertexSubsetLength(); v++)
             {
-                Vertex* v_ = graph.getVertexPointer(*v);
-                //TO DO: parallel
-                
-                //#pragma omp parallel for
-                for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
-                {
-                     #pragma omp task
-                    {
-                        if(C(*ngh) && F(*v, *ngh))
+                    long curr = U.getVertexAt(v);
+                    Vertex* v_ = graph.getVertexPointer(curr);
+                    //TO DO: parallel
+                    for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
+                    {   
+                        if(C(*ngh) && F(curr, *ngh))
                         {
                             Out.addVertex(*ngh);
-                        } 
-                    } 
-                }
-
+                        }  
+                    }
             }
-        }
         
 
 
-    }
-    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
-    {
-        Vertex* v_ = graph.getVertexPointer(*v);
-        //TO DO: parallel
-        for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
-        {
-            if(C(*ngh) && F(*v, *ngh))
-            {
-                Out.addVertex(*ngh);
-            }    
-        }
-    }
     std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
     Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
     //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cmath>
 
+#include <chrono>
 
 
 // bool Test::FxnOddEven(long vertexId)
@@ -167,7 +168,7 @@ void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
     // bfs_s(currGraph,0);
     // std::cout << "Running Parallel" << std::endl;
     // bfs(currGraph,0);
-    for(int i = 0; i < verticesCount; ++i)
+    for(int i = 0; i < 100; ++i)
     {
 //        std::cout << "New Call" << " Root: " << i << std::endl;
         TestBFS(currGraph,i);
@@ -218,7 +219,14 @@ void Test::TestBFS(Graph& currGraph, long root)
     extern std::deque<long> parents_s;
     extern std::deque<long> layers_s;
 
-    //bfs_s(currGraph, root);
+auto startS = std::chrono::high_resolution_clock::now();
+    bfs_s(currGraph, root);
+auto startP = std::chrono::high_resolution_clock::now();
     bfs(currGraph, root);
-    //CompareLayers(layers, layers_s);
+auto end = std::chrono::high_resolution_clock::now();
+auto seqT = std::chrono::duration<double>(startP - startS);
+auto parallelT = std::chrono::duration<double>(end - startP);
+
+    std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
+    CompareLayers(layers, layers_s);
 }

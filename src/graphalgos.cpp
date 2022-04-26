@@ -59,16 +59,13 @@ bool update(long v, long ind)
 {
 	long old = -1;
 	bool ret;
-	#pragma omp critical
+	if (parents[ind] == old)
 	{
-		if (parents[ind] == old)
-		{
-			parents[ind] = v;
-			ret = true;
-		}
-		else
-			ret = false;
+		parents[ind] = v;
+		ret = true;
 	}
+	else
+		ret = false;
 	
 	return ret;
 }
@@ -76,12 +73,10 @@ bool update(long v, long ind)
 bool cond(long ind) 
 {	
 	bool result;
-	#pragma omp critical
-	{
-		result = (parents[ind] == -1);
-	}
+	result = (parents[ind] == -1);
 	return result;
 }
+
 void bfs(const Graph &graph, long root)
 {
     long size = graph.getNumberVertices();

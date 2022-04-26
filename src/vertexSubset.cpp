@@ -67,4 +67,9 @@ void VertexSubset::addVertex(long vertex)
     p_vertices.push_back(vertex);
 }
 
+long VertexSubset::getVertexAt(long ind) const
+{
+    return p_vertices[ind];
+}
+
 

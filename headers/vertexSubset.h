@@ -15,7 +15,7 @@ class VertexSubset
     void setVertexSubset(std::vector<long> v); //Done: Tested
     void printVertexSubset(); //Done: Tested
     void LogIntoFile(std::fstream &out);
-
+    long getVertexAt(long ind) const;
 
     long getVertexSubsetLength() const; //Done
     long getVertexSubsetOutDegree(const Graph &graph) const; // TO DO: is it containing duplicates or the lenght of the set
