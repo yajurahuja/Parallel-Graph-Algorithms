@@ -25,6 +25,7 @@ class Vertex
     long getInDegree(); 
     void addOutDegree(long v); 
     void addInDegree(long v); 
+    long getOutNeighboursEl(long ind);
 
 
     private:

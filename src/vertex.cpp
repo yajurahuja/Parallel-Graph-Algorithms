@@ -69,3 +69,9 @@ void Vertex::addInDegree(long v)
 {
     InNeighbours.push_back(v);
 }
+
+
+long Vertex::getOutNeighboursEl(long ind)
+{
+    return OutNeighbours[ind];
+}

@@ -196,9 +196,10 @@ void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
     // }
 }
 
-bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s)
+//bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s)
+bool Test::CompareLayers(long* layers, long* layers_s)
 {
-    for(long i = 0; i < layers.size(); i++)
+    for(long i = 0; i < sizeof(layers)/sizeof(long); i++)
     {
         if(layers[i] != layers_s[i])
         {
@@ -208,16 +209,20 @@ bool Test::CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long>
         }
            
     }
-    //std::cout<<"Layers Match!"<<std::endl;
+    std::cout<<"Layers Match!"<<std::endl;
     return true;
 }
 
 void Test::TestBFS(Graph& currGraph, long root)
 {
-    extern std::deque<std::atomic<long>> parents;
-    extern std::deque<std::atomic<long>> layers;
-    extern std::deque<long> parents_s;
-    extern std::deque<long> layers_s;
+    // extern std::deque<std::atomic<long>> parents;
+    // extern std::deque<std::atomic<long>> layers;
+    // extern std::deque<long> parents_s;
+    // extern std::deque<long> layers_s;
+    extern long* parents;
+    extern long* layers;
+    extern long* parents_s;
+    extern long* layers_s;
 
 auto startS = std::chrono::high_resolution_clock::now();
     bfs_s(currGraph, root);
@@ -229,4 +234,9 @@ auto parallelT = std::chrono::duration<double>(end - startP);
 
     std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
     CompareLayers(layers, layers_s);
+
+    free(parents);
+    free(layers);
+    free(parents_s);
+    free(layers_s);
 }

@@ -23,9 +23,9 @@ class Test
 
     void DoTestingOnThisGraph(Graph &currGraph, std::string &logFile);
 
-    bool CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s);
+    //bool CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s);
     void TestBFS(Graph& currGraph, long root);
-
+    bool CompareLayers(long* layers, long* layers_s);
     //bool CompareParents(std::deque<std::atomic<long>> &parents, std::deque<long> &parents_s);
     
 

@@ -43,25 +43,38 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 {
     VertexSubset Out; 
     //TO DO: parallel
-        
-            for(long v = 0; v < U.getVertexSubsetLength(); v++)
-            {
+        #pragma omp parallel num_threads(2)
+        {
+            
+                #pragma omp for nowait
+                for(long v = 0; v < U.getVertexSubsetLength(); v++)
+                {
                     long curr = U.getVertexAt(v);
                     Vertex* v_ = graph.getVertexPointer(curr);
-                    //TO DO: parallel
-                    for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
-                    {   
-                        if(C(*ngh) && F(curr, *ngh))
-                        {
-                            Out.addVertex(*ngh);
-                        }  
-                    }
-            }
+
+                        //TO DO: parallel
+                        long oSize = v_->getOutDegree();
+                       // #pragma omp for nowait
+                        for(long ngh = 0; ngh < oSize; ngh++)
+                        //for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
+                        {   
+                                if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh)))
+                                {
+                                    #pragma omp critical
+                                    Out.addVertex(v_->getOutNeighboursEl(ngh));
+                                }  
+                            
+
+                        }
+                        
+                }
+            
+        }
         
 
-
-    std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
-    Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+    
+    //std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
+    //Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
     //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
     return Out;
 }

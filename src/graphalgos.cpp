@@ -3,12 +3,15 @@
 
 
 //BFS
-std::deque<long> parents;
-std::deque<long> layers;
-
+// std::deque<long> parents;
+// std::deque<long> layers;
+long* parents;
+long* layers;
+long* parents_s;
+long* layers_s;
 //BFS Sequential
-std::deque<long> parents_s;
-std::deque<long> layers_s;
+// std::deque<long> parents_s;
+// std::deque<long> layers_s;
 //Connected Components
 std::deque<std::atomic<long>> IDs;
 std::deque<std::atomic<long>> prevIDs;
@@ -19,9 +22,12 @@ std::deque<std::atomic<long>> Visited;
 
 void bfs_s(const Graph &graph, long root)
 {
+	
 	long size = graph.getNumberVertices();
-	parents_s.resize(size);
-	layers_s.resize(size);
+	parents_s = (long*) malloc(size * sizeof(long));
+	layers_s = (long*) malloc(size * sizeof(long));
+	// parents_s.resize(size);
+	// layers_s.resize(size);
 	//TO DO: maybe parallel
     for(int i = 0; i < size; i++)
 	{
@@ -58,30 +64,31 @@ void bfs_s(const Graph &graph, long root)
 bool update(long v, long ind)
 {
 	long old = -1;
-	bool ret;
-	if (parents[ind] == old)
-	{
-		parents[ind] = v;
-		ret = true;
-	}
-	else
-		ret = false;
-	
+	bool ret= false;
+
+		if (parents[ind] == old)
+		{
+			parents[ind] = v;
+			ret = true;
+		}
+		else
+			ret = false;	
 	return ret;
 }
 
 bool cond(long ind) 
 {	
-	bool result;
+	bool result = false;
 	result = (parents[ind] == -1);
 	return result;
 }
-
 void bfs(const Graph &graph, long root)
 {
     long size = graph.getNumberVertices();
-	parents.resize(size);
-	layers.resize(size);
+	parents = (long*) malloc(size * sizeof(long));
+	layers = (long*) malloc(size * sizeof(long));
+	// parents.resize(size);
+	// layers.resize(size);
 	//TO DO: parallel
     for(int i = 0; i < size; i++)
 	{
