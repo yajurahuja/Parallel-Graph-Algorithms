@@ -25,7 +25,8 @@ long Edge::getEndVertexId()
     return p_end_vertexId;
 }
 
-double Edge::getWeight()
+//double Edge::getWeight()
+long Edge::getWeight()
 {
     return p_weight;
 }

@@ -60,6 +60,9 @@ bool Graph::AddEdgeInGraph(std::shared_ptr<Edge> &edge) //Done
     Vertex *end = getVertexPointer(e.getEndVertexId());
     start->addOutDegree(end->getId());
     end->addInDegree(start->getId());
+    std::pair<long, long> p(e.getStartVertexId(), e.getEndVertexId());
+    
+    weights.insert({p, e.getWeight()});
     return true;
 }
 
@@ -73,6 +76,11 @@ Vertex* Graph::getVertexPointer(long v) const
     return p_table_uniqueNodeToVertex.at(v).get();
 }
 
+Edge* Graph::getEdgePointer(long e) const
+{
+    return p_edges.at(e).get();
+}
+
 long Graph::getNumberVertices() const
 {
     return p_table_uniqueNodeToVertex.size();
@@ -80,4 +88,11 @@ long Graph::getNumberVertices() const
 long Graph::getNumberEdges() const
 {
     return p_edges.size();
+}
+
+long Graph::getEdgeWeight(long start, long end) const
+{
+    //TO DO: get edge using start and end vertex
+    std::pair<long, long> p(start, end);
+    return weights.at(p);
 }

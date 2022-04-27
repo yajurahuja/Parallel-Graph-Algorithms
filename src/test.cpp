@@ -168,10 +168,10 @@ void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
     // bfs_s(currGraph,0);
     // std::cout << "Running Parallel" << std::endl;
     // bfs(currGraph,0);
-    for(int i = 0; i < 100; ++i)
+    for(int i = 0; i < 1; ++i)
     {
 //        std::cout << "New Call" << " Root: " << i << std::endl;
-        TestBFS(currGraph,i);
+        TestBF(currGraph,i);
 //        std::cout << "   " << std::endl;        
     }
 
@@ -200,7 +200,7 @@ void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
 //bool Test::CompareLayers(long* layers, long* layers_s)
 bool Test::CompareLayers(std::deque<long> &layers, std::deque<long> &layers_s)
 {
-    for(long i = 0; i < sizeof(layers)/sizeof(long); i++)
+    for(long i = 0; i < layers.size(); i++)
     {
         if(layers[i] != layers_s[i])
         {
@@ -227,13 +227,13 @@ void Test::TestBFS(Graph& currGraph, long root)
     // extern long* parents_s;
     // extern long* layers_s;
 
-auto startS = std::chrono::high_resolution_clock::now();
+    auto startS = std::chrono::high_resolution_clock::now();
     bfs_s(currGraph, root);
-auto startP = std::chrono::high_resolution_clock::now();
+    auto startP = std::chrono::high_resolution_clock::now();
     bfs(currGraph, root);
-auto end = std::chrono::high_resolution_clock::now();
-auto seqT = std::chrono::duration<double>(startP - startS);
-auto parallelT = std::chrono::duration<double>(end - startP);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto seqT = std::chrono::duration<double>(startP - startS);
+    auto parallelT = std::chrono::duration<double>(end - startP);
 
     std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
     CompareLayers(layers, layers_s);
@@ -242,4 +242,44 @@ auto parallelT = std::chrono::duration<double>(end - startP);
     // free(layers);
     // free(parents_s);
     // free(layers_s);
+}
+
+
+bool Test::CompareSPs(std::deque<long> &SP, std::deque<long> &SP_s)
+{
+    for(long i = 0; i < SP.size(); i++)
+    {
+        if(SP[i] != SP_s[i])
+        {
+            std::cout<<"SP MisMatch at vertex "<<i<<std::endl; 
+            return false;
+        }
+           
+    }
+    std::cout<<"SPs Match!"<<std::endl;
+    return true;
+}
+void Test::TestBF(Graph& currGraph, long root)
+{
+    extern std::deque<long> SP;
+    extern std::deque<long> Visited;
+    extern std::deque<long>SP_s;
+    extern std::deque<long> Visited_s;
+
+    std::cout<<"It all starts here\n";
+    
+    auto startS = std::chrono::high_resolution_clock::now();
+    bellmanFord_s(currGraph, root);
+    auto startP = std::chrono::high_resolution_clock::now();
+    bellmanFord(currGraph, root);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto seqT = std::chrono::duration<double>(startP - startS);
+    auto parallelT = std::chrono::duration<double>(end - startP);
+
+    std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
+    CompareSPs(SP, SP_s);
+    std::cout<<"Reached the end\n";
+    for(long i = 0; i < SP.size(); i++)
+        std::cout<<i<<" Seq : "<<SP_s[i]<< " Parallel : "<<SP[i]<<std::endl;
+
 }

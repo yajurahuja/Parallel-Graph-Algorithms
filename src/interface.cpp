@@ -23,6 +23,14 @@ void Interface::RemoveDuplicates(VertexSubset &U) //TO DO: This function removes
     // return;
 }
 
+VertexSubset Interface::EdgeMap(const Graph &graph,
+                            const VertexSubset &U,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                            const std::function<bool(long vertexIndex)> &C, long threshold)
+{
+    return EdgeMapSparse(graph, U, F, C);
+}
+
 
 VertexSubset Interface::EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
@@ -36,6 +44,55 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
         return EdgeMapSparse(graph, U, F, C);
 }
 
+VertexSubset Interface::EdgeMapSparse(const Graph &graph,
+                            const VertexSubset &U,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                            const std::function<bool(long vertexIndex)> &C) //Done : Tested
+{
+    VertexSubset Out; 
+    size_t *prefix;
+    #pragma omp parallel num_threads(8)
+    {
+        long ithread  = omp_get_thread_num(); //get the thread number
+        long nthreads = omp_get_num_threads(); //get number of threads
+        #pragma omp single
+        {
+            prefix = new size_t[nthreads+1]; //this stores the sizes of the different vertex neighbours
+            prefix[0] = 0;
+        }
+        std::vector<long> vec_private;
+        #pragma omp for nowait
+        for(long v = 0; v < U.getVertexSubsetLength(); v++)
+        {
+            long curr = U.getVertexAt(v);
+            Vertex* v_ = graph.getVertexPointer(curr);
+
+            long oSize = v_->getOutDegree();
+            for(long ngh = 0; ngh < oSize; ngh++)
+            {   
+                if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh), graph.getEdgeWeight(curr, v_->getOutNeighboursEl(ngh))))
+                    vec_private.push_back(v_->getOutNeighboursEl(ngh)); 
+            }
+        }
+        prefix[ithread + 1] = vec_private.size();    
+        #pragma omp barrier
+        #pragma omp single 
+        {
+            for(int i=1; i <= nthreads; i++) prefix[i] += prefix[i-1];
+            Out.getVertexSubset().resize(prefix[nthreads]);
+        }
+        //Out.getVertexSubset().insert(Out.getVertexSubset().end(), vec_private.begin(), vec_private.end());
+        std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
+    }
+        
+
+    
+    std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
+    Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+    //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
+    return Out;
+}
+
 
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
@@ -47,7 +104,7 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
         #pragma omp parallel num_threads(8)
         {
                 std::vector<long> vec_private;
-                #pragma omp for nowait 
+                #pragma omp for nowait
                 for(long v = 0; v < U.getVertexSubsetLength(); v++)
                 {
                     long curr = U.getVertexAt(v);
@@ -191,21 +248,10 @@ VertexSubset Interface::VertexMap(const VertexSubset &U,
 {
     VertexSubset Out;
     //TO DO: parallel: Method 1: without critical section
-    #pragma omp parallel
+    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
     {
-        #pragma omp single nowait
-        {
-            for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
-            {
-                #pragma omp task
-                {
-                    if(F(*v))
-                        Out.addVertex(*v);
-                }
-
-            }
-        }
-
+            if(F(*v))
+                Out.addVertex(*v);
     }
 
     //std::cout<<std::endl;

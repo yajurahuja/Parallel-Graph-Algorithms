@@ -7,6 +7,7 @@
 #include <deque>
 #include <omp.h> 
 #include<atomic>
+#include<limits>
 
 class Graph;
 //Sequential BFS
@@ -22,10 +23,12 @@ bool CCUpdate(long s, long d);
 bool Copy(long ind);
 void connectedComp(const Graph &graph);
 
+//Sequential Bellman Ford
+bool bellmanFord_s(const Graph &graph, long root);
 //Bellman Ford
-bool bfUpdate(long s, long d,double weight);
+bool bfUpdate(long s, long d, long edgeWeight); //TO DO: for double weight
 bool bfReset(long ind);
-void bellmanFord(const Graph &graph, long root);
+bool bellmanFord(const Graph &graph, long root);
 
 
 
