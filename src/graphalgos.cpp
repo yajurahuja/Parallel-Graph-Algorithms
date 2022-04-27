@@ -1,34 +1,47 @@
 #include "../headers/allHeaders.h"
 
 
-
-//BFS
-// std::deque<long> parents;
-// std::deque<long> layers;
-long* parents;
-long* layers;
-long* parents_s;
-long* layers_s;
-//BFS Sequential
-// std::deque<long> parents_s;
-// std::deque<long> layers_s;
-//Connected Components
-std::deque<std::atomic<long>> IDs;
-std::deque<std::atomic<long>> prevIDs;
+// std::deque<std::atomic<long>> parents;
+// std::deque<std::atomic<long>> layers;
+std::deque<long> parents;
+std::deque<long> layers;
+std::deque<long> parents_s;
+std::deque<long> layers_s;
+// long* parents;
+// long* layers;
+// long* parents_s;
+// long* layers_s;
+std::deque<long> IDs;
+std::deque<long> prevIDs;
 //Bellman Ford
 std::deque<std::atomic<double>> SP;
 std::deque<std::atomic<long>> Visited;
+
+bool CAS(long *ptr, long oldv, long newv)
+{
+    return __sync_bool_compare_and_swap((long*)ptr, *((long*)&oldv), *((long*)&newv));
+}
+
+bool writeMin(long *ptr, long newv)
+{
+	long c;
+	bool ret = false;
+	do
+	{
+		c = *ptr;
+	} while (c > newv && !(ret = CAS(ptr, c, newv)));
+	return ret;
+}
+
+
 
 
 void bfs_s(const Graph &graph, long root)
 {
 	
 	long size = graph.getNumberVertices();
-	parents_s = (long*) malloc(size * sizeof(long));
-	layers_s = (long*) malloc(size * sizeof(long));
-	// parents_s.resize(size);
-	// layers_s.resize(size);
-	//TO DO: maybe parallel
+	parents_s.resize(size);
+	layers_s.resize(size);
     for(int i = 0; i < size; i++)
 	{
         parents_s[i] = -1;
@@ -61,19 +74,17 @@ void bfs_s(const Graph &graph, long root)
 }
 
 
+
+// bool update(long v, long ind)
+// {
+// 	long old = -1;
+// 	return parents[ind].compare_exchange_strong(old, v);
+// }
+
 bool update(long v, long ind)
 {
 	long old = -1;
-	bool ret= false;
-
-		if (parents[ind] == old)
-		{
-			parents[ind] = v;
-			ret = true;
-		}
-		else
-			ret = false;	
-	return ret;
+	return CAS(&parents[ind], old, v);
 }
 
 bool cond(long ind) 
@@ -82,14 +93,14 @@ bool cond(long ind)
 	result = (parents[ind] == -1);
 	return result;
 }
+
 void bfs(const Graph &graph, long root)
 {
     long size = graph.getNumberVertices();
-	parents = (long*) malloc(size * sizeof(long));
-	layers = (long*) malloc(size * sizeof(long));
-	// parents.resize(size);
-	// layers.resize(size);
+	parents.resize(size);
+	layers.resize(size);
 	//TO DO: parallel
+	#pragma omp parallel for
     for(int i = 0; i < size; i++)
 	{
         parents[i] = -1;
@@ -106,13 +117,6 @@ void bfs(const Graph &graph, long root)
 		//TO DO: parallel
 		for(auto v = frontier.getVertexSubsetBegin(); v < frontier.getVertexSubsetEnd(); v++)
 			layers[*v] = layers[parents[*v]] + 1;
-		
-		//std::cout<<"iteration "<<layer<<":"<<std::endl;
-		// for(long i = 0; i < layers.size(); i++)
-		// {
-		// 	std::cout<<i<<":"<<layers[i]<<" ";
-		// }
-		//std::cout<<std::endl;
 		layer += 1;
 	}
     // std::cout<<"Parallel:"<<std::endl;
@@ -122,8 +126,9 @@ void bfs(const Graph &graph, long root)
 }
 
 
-bool writeMin()
+bool writeMin(long x, long v)
 {
+	//std::atomic_compare_exchange_strong()
 	return true;
 }
 
@@ -131,33 +136,41 @@ bool writeMin()
 //Connected Components
 bool CCUpdate(long s, long d)
 {
-	long origId = IDs[d].load();
+	long origId = IDs[d];
+	if(writeMin(&IDs[d], IDs[s]))
+		return (origId == prevIDs[d]);
 	return true;
 }
 bool Copy(long ind)
 {
-	prevIDs[ind] = IDs[ind].load();
-	return  true;
+	prevIDs[ind] = IDs[ind];
+	return true;
 }
 void connectedComp(const Graph &graph)
 {
+	long threshhold = 0; //set threshhold
 	VertexSubset frontier;
+	while(frontier.getVertexSubsetLength() > 0)
+	{
+		frontier = Interface::VertexMap(frontier, &Copy);
+		frontier = Interface::EdgeMap(graph, frontier, &CCUpdate, &Copy, threshhold);
+	}
 }
 
 
 
-//Bellman Ford
-bool bfUpdate(long s, long d,double weight)
-{
-	return true;
-}
+// //Bellman Ford
+// bool bfUpdate(long s, long d,double weight)
+// {
+// 	return true;
+// }
 
-bool bfReset(long ind)
-{
-	Visited[ind] = 0;
-	return true;
-}
-void bellmanFord(const Graph &graph, long root)
-{
-	return;
-}
+// bool bfReset(long ind)
+// {
+// 	Visited[ind] = 0;
+// 	return true;
+// }
+// void bellmanFord(const Graph &graph, long root)
+// {
+// 	return;
+// }

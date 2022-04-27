@@ -6,6 +6,7 @@
 #include <iostream>
 #include <deque>
 #include <omp.h> 
+#include<atomic>
 
 class Graph;
 //Sequential BFS
