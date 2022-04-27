@@ -14,10 +14,10 @@ std::deque<long> layers_s;
 // std::deque<long> IDs;
 // std::deque<long> prevIDs;
 //Bellman Ford
-std::deque<long> SP;
+std::deque<double> SP;
 std::deque<long> Visited;
 
-std::deque<long>SP_s;
+std::deque<double>SP_s;
 std::deque<long> Visited_s;
 
 bool CAS(long *ptr, long oldv, long newv)
@@ -25,9 +25,25 @@ bool CAS(long *ptr, long oldv, long newv)
     return __sync_bool_compare_and_swap((long*)ptr, *((long*)&oldv), *((long*)&newv));
 }
 
+bool CAS(double *ptr, double oldv, double newv)
+{
+	return __atomic_compare_exchange((double*)ptr, ((double*)&oldv), ((double*)&newv), 0, __ATOMIC_RELAXED, __ATOMIC_RELAXED);
+}
+
 bool writeMin(long *ptr, long newv)
 {
 	long c;
+	bool ret = false;
+	do
+	{
+		c = *ptr;
+	} while (c > newv && !(ret = CAS(ptr, c, newv)));
+	return ret;
+}
+
+bool writeMin(double *ptr, double newv)
+{
+	double c;
 	bool ret = false;
 	do
 	{
@@ -150,13 +166,13 @@ void bfs(const Graph &graph, long root)
 bool bellmanFord_s(const Graph &graph, long root)
 {
 	long size = graph.getNumberVertices(); //size stores the number of vertices
-	SP.resize(size);
-	Visited.resize(size);
+	SP_s.resize(size);
+	Visited_s.resize(size);
 	//TO DO: parallel
 	for(int i = 0; i < size; i++) //initialization
 	{	
-		SP_s[i] = std::numeric_limits<long>::max();
-		Visited[i] = 0;
+		SP_s[i] = std::numeric_limits<double>::max();
+		Visited_s[i] = 0;
 	}
 	SP_s[root] = 0;
 	for(long i = 1; i < size; i++)
@@ -166,7 +182,7 @@ bool bellmanFord_s(const Graph &graph, long root)
 			Edge* curr = graph.getEdgePointer(e);
 			long u = curr->getStartVertexId();
 			long v = curr->getEndVertexId();
-			long weight = curr->getWeight();
+			double weight = curr->getWeight();
 			if (SP_s[u] + weight < SP_s[v])
                 SP_s[v] = SP_s[u] + weight;		
 		}
@@ -177,7 +193,7 @@ bool bellmanFord_s(const Graph &graph, long root)
 		Edge* curr = graph.getEdgePointer(e);
 		long u = curr->getStartVertexId();
 		long v = curr->getEndVertexId();
-		long weight = curr->getWeight();	
+		double weight = curr->getWeight();	
 		if (SP_s[u] + weight < SP_s[v])
             return true;
     }
@@ -188,7 +204,7 @@ bool bellmanFord_s(const Graph &graph, long root)
 
 
 //Bellman Ford
-bool bfUpdate(long s, long d, long edgeWeight)
+bool bfUpdate(long s, long d, double edgeWeight)
 {
 	if(writeMin(&SP[d], SP[s] + edgeWeight))
 		return CAS(&Visited[d], 0, 1);
@@ -210,7 +226,7 @@ bool bellmanFord(const Graph &graph, long root)
 	//TO DO: parallel
 	for(int i = 0; i < size; i++) //initialization
 	{	
-		SP[i] = std::numeric_limits<long>::max();
+		SP[i] = std::numeric_limits<double>::max();
 		Visited[i] = 0;
 	}
 	SP[root] = 0;

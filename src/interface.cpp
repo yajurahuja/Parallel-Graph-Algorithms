@@ -25,7 +25,7 @@ void Interface::RemoveDuplicates(VertexSubset &U) //TO DO: This function removes
 
 VertexSubset Interface::EdgeMap(const Graph &graph,
                             const VertexSubset &U,
-                            const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                             const std::function<bool(long vertexIndex)> &C, long threshold)
 {
     return EdgeMapSparse(graph, U, F, C);
@@ -46,7 +46,7 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
 
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                             const VertexSubset &U,
-                            const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                             const std::function<bool(long vertexIndex)> &C) //Done : Tested
 {
     VertexSubset Out; 

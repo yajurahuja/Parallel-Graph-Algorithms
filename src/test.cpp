@@ -228,7 +228,7 @@ void Test::TestBFS(Graph& currGraph, long root)
     // extern long* layers_s;
 
     auto startS = std::chrono::high_resolution_clock::now();
-    bfs_s(currGraph, root);
+    bfs_s(currGraph, root);std::cout<<"Done Sequential\n";
     auto startP = std::chrono::high_resolution_clock::now();
     bfs(currGraph, root);
     auto end = std::chrono::high_resolution_clock::now();
@@ -245,7 +245,7 @@ void Test::TestBFS(Graph& currGraph, long root)
 }
 
 
-bool Test::CompareSPs(std::deque<long> &SP, std::deque<long> &SP_s)
+bool Test::CompareSPs(std::deque<double> &SP, std::deque<double> &SP_s)
 {
     for(long i = 0; i < SP.size(); i++)
     {
@@ -261,15 +261,16 @@ bool Test::CompareSPs(std::deque<long> &SP, std::deque<long> &SP_s)
 }
 void Test::TestBF(Graph& currGraph, long root)
 {
-    extern std::deque<long> SP;
+    extern std::deque<double> SP;
     extern std::deque<long> Visited;
-    extern std::deque<long>SP_s;
+    extern std::deque<double>SP_s;
     extern std::deque<long> Visited_s;
 
     std::cout<<"It all starts here\n";
     
     auto startS = std::chrono::high_resolution_clock::now();
     bellmanFord_s(currGraph, root);
+    std::cout<<"Done Sequential\n";
     auto startP = std::chrono::high_resolution_clock::now();
     bellmanFord(currGraph, root);
     auto end = std::chrono::high_resolution_clock::now();
@@ -279,7 +280,7 @@ void Test::TestBF(Graph& currGraph, long root)
     std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
     CompareSPs(SP, SP_s);
     std::cout<<"Reached the end\n";
-    for(long i = 0; i < SP.size(); i++)
-        std::cout<<i<<" Seq : "<<SP_s[i]<< " Parallel : "<<SP[i]<<std::endl;
+    // for(long i = 0; i < SP.size(); i++)
+    //     std::cout<<i<<" Seq : "<<SP_s[i]<< " Parallel : "<<SP[i]<<std::endl;
 
 }

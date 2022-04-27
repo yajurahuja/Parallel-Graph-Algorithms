@@ -40,7 +40,7 @@ class Interface
 
     static VertexSubset EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
-                                const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                                 const std::function<bool(long vertexIndex)> &C, long threshold); //Done : Tested
 
     static VertexSubset EdgeMap(const Graph &graph,
@@ -62,7 +62,7 @@ class Interface
     
     static VertexSubset EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
-                                const std::function<bool(long startVertexIndex, long endVertexIndex, long edgeWeight)> &F,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                                 const std::function<bool(long vertexIndex)> &C); //Done : Tested
 
     static VertexSubset EdgeMapSparse_r(const Graph &graph,

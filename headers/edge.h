@@ -11,7 +11,7 @@ class Edge
     long getStartVertexId();
     long getEndVertexId();
     //double getWeight();
-    long getWeight();
+    double getWeight();
     
     private:
     long p_start_vertexId;

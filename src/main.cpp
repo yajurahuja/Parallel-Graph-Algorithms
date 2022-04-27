@@ -11,12 +11,13 @@ int main(int argc, char** argv)
 
     //!Hard coding all the file Names;
     std::vector<std::string> fileNames;
-    fileNames.emplace_back("tinyEWDlong.txt");
+    //fileNames.emplace_back("tinyEWDlong.txt");
+    //fileNames.emplace_back("tinyEWD.txt");
     //fileNames.emplace_back("BFtest.txt");
     //fileNames.emplace_back("mediumEWD.txt");
     //fileNames.emplace_back("largeEWD.txt");
     //fileNames.emplace_back("1000EWD.txt");
- //fileNames.emplace_back("10000EWD.txt");
+    fileNames.emplace_back("10000EWD.txt");
 
 
     //!Getting the current path

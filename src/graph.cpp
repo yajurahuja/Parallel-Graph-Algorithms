@@ -90,7 +90,7 @@ long Graph::getNumberEdges() const
     return p_edges.size();
 }
 
-long Graph::getEdgeWeight(long start, long end) const
+double Graph::getEdgeWeight(long start, long end) const
 {
     //TO DO: get edge using start and end vertex
     std::pair<long, long> p(start, end);

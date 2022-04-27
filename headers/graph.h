@@ -45,12 +45,12 @@ class Graph
     Edge* getEdgePointer(long e) const;
     long getNumberVertices() const;
     long getNumberEdges() const;
-    long getEdgeWeight(long start, long end) const;
+    double getEdgeWeight(long start, long end) const;
     
     private:
     std::unordered_map<long, std::shared_ptr<Vertex> > p_table_uniqueNodeToVertex;
     std::vector<std::shared_ptr<Edge> > p_edges;
-    std::unordered_map<std::pair<long, long>, long, HASH> weights;
+    std::unordered_map<std::pair<long, long>, double, HASH> weights;
 
 };
 
