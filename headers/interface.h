@@ -53,6 +53,11 @@ class Interface
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
                                 const std::function<bool(long vertexIndex)> &C); //Done : Tested
 
+    static VertexSubset EdgeMapSparse_r(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C); // Trying reduction         
+
     static VertexSubset EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
