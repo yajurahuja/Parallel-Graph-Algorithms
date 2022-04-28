@@ -11,7 +11,11 @@ class VertexSubset;
 class Graph;
 class Test
 {
+
    public:
+
+    //!Constructor
+    Test(int threads, std::string logPath, const std::fstream & stream);
    //bool FxnOddEven(long vertexId);
    //bool FxnOddEven_(long v1Id, long v2Id);
     std::vector<long> GenerateRandomIntegers(long minInteger, long maxInteger, long totalNumbers);
@@ -41,6 +45,34 @@ class Test
     //                        VertexSubset &s,
     //                        std::function<bool(long id1, long id2)>,
     //                        std::function<bool(long id1, long id2)>);
+
+    private:
+    int p_threadsCount;
+    std::string p_logFilePath;
+    const std::fstream & p_currFileStream;
+
+
+    //!Temp Containers for storing data
+
+    //!These are for bfs: //!Note that
+
+    public: //Making it public, use it wisrely
+
+    std::vector<long> p_sourceVertices;
+    std::vector<double> p_seqTimesBFS;
+    std::vector<double> p_parallelTimesBFS;
+    std::vector<double> p_speedUpBFS;
+    std::vector<long>   p_maxLayersCount;
+    std::vector<bool> p_comparisonSuccess;
+
+    //!These are for BF
+    //!These are for bfs: //!Note that
+
+    std::vector<long> p_BF_sourceVertices;
+    std::vector<double> p_BF_seqTimes;
+    std::vector<double> p_BF_parTimes;
+    std::vector<double> p_BF_speedUp;
+    std::vector<bool> p_BF_comparisonSuccess;
 
 };
 
