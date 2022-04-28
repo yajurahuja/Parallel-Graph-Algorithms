@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <deque>
-#include <omp.h> 
+//#include <omp.h> 
 #include<atomic>
 #include<limits>
 

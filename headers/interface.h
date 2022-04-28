@@ -15,7 +15,7 @@
 #include <memory>
 #include <unordered_map>
 #include <functional>
-#include <omp.h>
+//#include <omp.h>
 
 
 //printing functions

@@ -12,6 +12,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <algorithm>
+#include <omp.h>
 
 
 #include"graphalgos.h"
