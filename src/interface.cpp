@@ -51,7 +51,7 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 {
     VertexSubset Out; 
     size_t *prefix;
-    #pragma omp parallel num_threads(8)
+    #pragma omp parallel num_threads(4)
     {
         long ithread  = omp_get_thread_num(); //get the thread number
         long nthreads = omp_get_num_threads(); //get number of threads
@@ -148,7 +148,7 @@ VertexSubset Interface::EdgeMapSparse_r(const Graph &graph,
 {
     VertexSubset Out; 
     size_t *prefix;
-    #pragma omp parallel num_threads(8)
+    #pragma omp parallel num_threads(6)
     {
         long ithread  = omp_get_thread_num(); //get the thread number
         long nthreads = omp_get_num_threads(); //get number of threads
@@ -247,13 +247,33 @@ VertexSubset Interface::VertexMap(const VertexSubset &U,
                                   const std::function<bool(long vertexIndex)> &F)
 {
     VertexSubset Out;
-    //TO DO: parallel: Method 1: without critical section
-    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+    size_t *prefix;
+    #pragma omp parallel num_threads(6)
     {
-            if(F(*v))
-                Out.addVertex(*v);
+        long ithread  = omp_get_thread_num(); //get the thread number
+        long nthreads = omp_get_num_threads(); //get number of threads
+        #pragma omp single
+        {
+            prefix = new size_t[nthreads+1]; //this stores the sizes of the different vertex neighbours
+            prefix[0] = 0;
+        }
+        std::vector<long> vec_private;
+        #pragma omp for nowait
+        for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+        {
+                if(F(*v))
+                    vec_private.push_back(*v);
+        }
+        prefix[ithread + 1] = vec_private.size();    
+        #pragma omp barrier
+        #pragma omp single 
+        {
+            for(int i=1; i <= nthreads; i++) prefix[i] += prefix[i-1];
+            Out.getVertexSubset().resize(prefix[nthreads]);
+        }
+        //Out.getVertexSubset().insert(Out.getVertexSubset().end(), vec_private.begin(), vec_private.end());
+        std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
     }
-
     //std::cout<<std::endl;
     return Out;
 }   

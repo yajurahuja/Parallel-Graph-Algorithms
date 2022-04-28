@@ -188,15 +188,15 @@ bool bellmanFord_s(const Graph &graph, long root)
 		}
 	}
 
-	for(long e = 0; e < graph.getNumberEdges(); e++)
-	{
-		Edge* curr = graph.getEdgePointer(e);
-		long u = curr->getStartVertexId();
-		long v = curr->getEndVertexId();
-		double weight = curr->getWeight();	
-		if (SP_s[u] + weight < SP_s[v])
-            return true;
-    }
+	// for(long e = 0; e < graph.getNumberEdges(); e++)
+	// {
+	// 	Edge* curr = graph.getEdgePointer(e);
+	// 	long u = curr->getStartVertexId();
+	// 	long v = curr->getEndVertexId();
+	// 	double weight = curr->getWeight();	
+	// 	if (SP_s[u] + weight < SP_s[v])
+    //         return true;
+    // }
 	return false;
 }
 
@@ -236,6 +236,7 @@ bool bellmanFord(const Graph &graph, long root)
 	{
 		round += 1;
 		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate, &bfReset, threshhold);
+		frontier = Interface::VertexMap(frontier, &bfReset);
 	}
 	if(round == size)
 	{

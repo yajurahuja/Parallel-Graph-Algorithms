@@ -269,7 +269,7 @@ void Test::TestBF(Graph& currGraph, long root)
     std::cout<<"It all starts here\n";
     
     auto startS = std::chrono::high_resolution_clock::now();
-    bellmanFord_s(currGraph, root);
+    //bellmanFord_s(currGraph, root);
     std::cout<<"Done Sequential\n";
     auto startP = std::chrono::high_resolution_clock::now();
     bellmanFord(currGraph, root);
