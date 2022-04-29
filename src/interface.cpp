@@ -87,7 +87,8 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
         //Out.getVertexSubset().insert(Out.getVertexSubset().end(), vec_private.begin(), vec_private.end());
         std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
     }
-        
+
+    delete prefix; 
 
     
     std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
@@ -95,57 +96,8 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
     //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
     return Out;
 }
-
 
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
-                                const VertexSubset &U,
-                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C,
-                                int threadsCount)
-{
-    VertexSubset Out; 
-    //TO DO: parallel
-        #pragma omp parallel num_threads(threadsCount)
-        {
-                std::vector<long> vec_private;
-                #pragma omp for nowait
-                for(long v = 0; v < U.getVertexSubsetLength(); v++)
-                {
-                    long curr = U.getVertexAt(v);
-                    Vertex* v_ = graph.getVertexPointer(curr);
-
-                        //TO DO: parallel
-                        long oSize = v_->getOutDegree();
-                       // #pragma omp for nowait
-                        for(long ngh = 0; ngh < oSize; ngh++)
-                        //for(auto ngh = v_->getOutNeighboursBegin(); ngh < v_->getOutNeighboursEnd(); ngh++)
-                        {   
-                                if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh)))
-                                {
-                                    vec_private.push_back(v_->getOutNeighboursEl(ngh));
-                                    // #pragma omp critical
-                                    // Out.addVertex(v_->getOutNeighboursEl(ngh));
-                                }  
-                            
-
-                        }
-                        
-                }
-                #pragma omp critical
-                Out.getVertexSubset().insert(Out.getVertexSubset().end(), vec_private.begin(), vec_private.end());
-            
-        }
-        
-
-    
-    std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
-    Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
-    //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
-    return Out;
-}
-
-
-VertexSubset Interface::EdgeMapSparse_r(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
                                 const std::function<bool(long vertexIndex)> &C,
@@ -187,7 +139,7 @@ VertexSubset Interface::EdgeMapSparse_r(const Graph &graph,
         std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
     }
         
-
+    delete prefix;
     
     std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
     Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
@@ -282,6 +234,6 @@ VertexSubset Interface::VertexMap(const VertexSubset &U,
         //Out.getVertexSubset().insert(Out.getVertexSubset().end(), vec_private.begin(), vec_private.end());
         std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
     }
-    //std::cout<<std::endl;
+    delete prefix;
     return Out;
 }   
