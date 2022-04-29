@@ -102,26 +102,30 @@ bool cond(long ind)
 	return result;
 }
 
-void bfs(const Graph &graph, long root)
+void bfs(const Graph &graph, long root, int threadsCount)
 {
     long size = graph.getNumberVertices();
 	parents.resize(size);
 	layers.resize(size);
 	//TO DO: parallel
+
+//	std::cout << "Inside bfs" << std::endl;
+
 	#pragma omp parallel for
     for(int i = 0; i < size; i++)
 	{
         parents[i] = -1;
 		layers[i] = -1;
 	}
-    long threshhold; //set the threshhold
+    long threshhold = 0; //set the threshhold
     parents[root] = root; //set the root's parent to itself
 	layers[root] = 0; //set the layer of root to 0
 	VertexSubset frontier(root);
 	long layer = 1;
 	while(frontier.getVertexSubsetLength() > 0)
 	{
-		frontier = Interface::EdgeMap(graph, frontier, &update, &cond, threshhold);
+//	std::cout << "Inside bfs 2" << std::endl;
+		frontier = Interface::EdgeMap(graph, frontier, &update, &cond, threshhold, threadsCount);
 		//TO DO: parallel
 		for(auto v = frontier.getVertexSubsetBegin(); v < frontier.getVertexSubsetEnd(); v++)
 			layers[*v] = layers[parents[*v]] + 1;
@@ -163,9 +167,63 @@ void bfs(const Graph &graph, long root)
 
 
 //Sequential Bellman Ford
+// bool bellmanFord_s(const Graph &graph, long root)
+// {
+// 	long size = graph.getNumberVertices(); //size stores the number of vertices
+// 	SP_s.resize(size);
+// 	Visited_s.resize(size);
+// 	//TO DO: parallel
+// 	for(int i = 0; i < size; i++) //initialization
+// 	{	
+// 		SP_s[i] = std::numeric_limits<double>::max();
+// 		Visited_s[i] = 0;
+// 	}
+// 	SP_s[root] = 0;
+// 	for(long i = 1; i < size; i++)
+// 	{
+// 		for(long e = 0; e < graph.getNumberEdges(); e++)
+// 		{
+// 			Edge* curr = graph.getEdgePointer(e);
+// 			long u = curr->getStartVertexId();
+// 			long v = curr->getEndVertexId();
+// 			double weight = curr->getWeight();
+// 			if (SP_s[u] + weight < SP_s[v])
+//                 SP_s[v] = SP_s[u] + weight;		
+// 		}
+// 	}
+
+// 	// for(long e = 0; e < graph.getNumberEdges(); e++)
+// 	// {
+// 	// 	Edge* curr = graph.getEdgePointer(e);
+// 	// 	long u = curr->getStartVertexId();
+// 	// 	long v = curr->getEndVertexId();
+// 	// 	double weight = curr->getWeight();	
+// 	// 	if (SP_s[u] + weight < SP_s[v])
+//     //         return true;
+//     // }
+// 	return false;
+// }
+
+//Bellman Ford
+bool bfUpdate_s(long s, long d, double edgeWeight)
+{
+	if(writeMin(&SP_s[d], SP_s[s] + edgeWeight))
+		return CAS(&Visited_s[d], 0, 1);
+	else
+		return false;
+}
+
+bool bfReset_s(long ind)
+{
+	Visited_s[ind] = 0;
+	return true;
+}
+
+
 bool bellmanFord_s(const Graph &graph, long root)
 {
-	long size = graph.getNumberVertices(); //size stores the number of vertices
+	long threshhold = 0;
+	long size = graph.getNumberVertices();
 	SP_s.resize(size);
 	Visited_s.resize(size);
 	//TO DO: parallel
@@ -175,31 +233,21 @@ bool bellmanFord_s(const Graph &graph, long root)
 		Visited_s[i] = 0;
 	}
 	SP_s[root] = 0;
-	for(long i = 1; i < size; i++)
+	VertexSubset frontier(root);
+	long round = 0;
+	while (frontier.getVertexSubsetLength() > 0 && round < size)
 	{
-		for(long e = 0; e < graph.getNumberEdges(); e++)
-		{
-			Edge* curr = graph.getEdgePointer(e);
-			long u = curr->getStartVertexId();
-			long v = curr->getEndVertexId();
-			double weight = curr->getWeight();
-			if (SP_s[u] + weight < SP_s[v])
-                SP_s[v] = SP_s[u] + weight;		
-		}
+		round += 1;
+		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate_s, &bfReset_s, threshhold);
+		frontier = Interface::VertexMap(frontier, &bfReset_s);
 	}
-
-	// for(long e = 0; e < graph.getNumberEdges(); e++)
-	// {
-	// 	Edge* curr = graph.getEdgePointer(e);
-	// 	long u = curr->getStartVertexId();
-	// 	long v = curr->getEndVertexId();
-	// 	double weight = curr->getWeight();	
-	// 	if (SP_s[u] + weight < SP_s[v])
-    //         return true;
-    // }
+	if(round == size)
+	{
+		std::cout<<"Encountered a negative cycle\n";
+		return true;
+	}
 	return false;
 }
-
 
 
 
@@ -217,7 +265,7 @@ bool bfReset(long ind)
 	Visited[ind] = 0;
 	return true;
 }
-bool bellmanFord(const Graph &graph, long root)
+bool bellmanFord(const Graph &graph, long root, int threadsCount)
 {
 	long threshhold = 0;
 	long size = graph.getNumberVertices();

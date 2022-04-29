@@ -26,32 +26,35 @@ void Interface::RemoveDuplicates(VertexSubset &U) //TO DO: This function removes
 VertexSubset Interface::EdgeMap(const Graph &graph,
                             const VertexSubset &U,
                             const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
-                            const std::function<bool(long vertexIndex)> &C, long threshold)
+                            const std::function<bool(long vertexIndex)> &C, long threshold,
+                            int threadsCount)
 {
-    return EdgeMapSparse(graph, U, F, C);
+    return EdgeMapSparse(graph, U, F, C, threadsCount);
 }
 
 
 VertexSubset Interface::EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C, long threshold)
+                                const std::function<bool(long vertexIndex)> &C, long threshold,
+                                int threadsCount)
 {
     // if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
     //     return EdgeMapDense(graph, U, F, C);
     // else
         //return EdgeMapSparse(graph, U, F, C);
-        return EdgeMapSparse(graph, U, F, C);
+        return EdgeMapSparse(graph, U, F, C, threadsCount);
 }
 
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                             const VertexSubset &U,
                             const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
-                            const std::function<bool(long vertexIndex)> &C) //Done : Tested
+                            const std::function<bool(long vertexIndex)> &C,
+                            int threadsCount) //Done : Tested
 {
     VertexSubset Out; 
     size_t *prefix;
-    #pragma omp parallel num_threads(4)
+    #pragma omp parallel num_threads(threadsCount)
     {
         long ithread  = omp_get_thread_num(); //get the thread number
         long nthreads = omp_get_num_threads(); //get number of threads
@@ -97,11 +100,12 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
 {
     VertexSubset Out; 
     //TO DO: parallel
-        #pragma omp parallel num_threads(8)
+        #pragma omp parallel num_threads(threadsCount)
         {
                 std::vector<long> vec_private;
                 #pragma omp for nowait
@@ -144,11 +148,12 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
 VertexSubset Interface::EdgeMapSparse_r(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
 {
     VertexSubset Out; 
     size_t *prefix;
-    #pragma omp parallel num_threads(6)
+    #pragma omp parallel num_threads(threadsCount)
     {
         long ithread  = omp_get_thread_num(); //get the thread number
         long nthreads = omp_get_num_threads(); //get number of threads
@@ -196,7 +201,8 @@ VertexSubset Interface::EdgeMapSparse_r(const Graph &graph,
 VertexSubset Interface::EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
 {
     VertexSubset Out;
     //TO DO: Parallel
@@ -220,7 +226,8 @@ VertexSubset Interface::EdgeMapDense(const Graph &graph,
 VertexSubset Interface::EdgeMapDenseWrite(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C)
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
 {
     VertexSubset Out;
     // TO DO: parallel
@@ -244,11 +251,12 @@ VertexSubset Interface::EdgeMapDenseWrite(const Graph &graph,
 }
 
 VertexSubset Interface::VertexMap(const VertexSubset &U,
-                                  const std::function<bool(long vertexIndex)> &F)
+                                  const std::function<bool(long vertexIndex)> &F,
+                                  int threadsCount)
 {
     VertexSubset Out;
     size_t *prefix;
-    #pragma omp parallel num_threads(6)
+    #pragma omp parallel num_threads(threadsCount)
     {
         long ithread  = omp_get_thread_num(); //get the thread number
         long nthreads = omp_get_num_threads(); //get number of threads

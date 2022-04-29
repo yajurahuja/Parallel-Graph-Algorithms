@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <iostream>
 #include <deque>
-#include <omp.h> 
+//#include <omp.h> 
 #include<atomic>
 #include<limits>
 
@@ -24,7 +24,7 @@ void bfs_s(const Graph &graph, long root);
 //BFS using interface
 bool update(long v, long ind);
 bool cond(long ind);
-void bfs(const Graph &graph, long root);
+void bfs(const Graph &graph, long root, int threadsCount);
 
 //Conected Components
 bool CCUpdate(long s, long d);
@@ -36,7 +36,11 @@ bool bellmanFord_s(const Graph &graph, long root);
 //Bellman Ford
 bool bfUpdate(long s, long d, double edgeWeight); //TO DO: for double weight
 bool bfReset(long ind);
-bool bellmanFord(const Graph &graph, long root);
+
+bool bfUpdate_s(long s, long d, double edgeWeight); //TO DO: for double weight
+bool bfReset_s(long ind);
+
+bool bellmanFord(const Graph &graph, long root, int threadsCount);
 
 
 
