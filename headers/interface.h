@@ -41,44 +41,52 @@ class Interface
     static VertexSubset EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
-                                const std::function<bool(long vertexIndex)> &C, long threshold); //Done : Tested
+                                const std::function<bool(long vertexIndex)> &C, long threshold,
+                                int threadsCount = 1); //Done : Tested
 
     static VertexSubset EdgeMap(const Graph &graph,
                             const VertexSubset &U,
                             const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                            const std::function<bool(long vertexIndex)> &C, long threshold); //Done : Tested
+                            const std::function<bool(long vertexIndex)> &C, long threshold,
+                            int threadsCount = 1); //Done : Tested
 
     
 
     static VertexSubset VertexMap(const VertexSubset &U, 
-                                        const std::function<bool(long vertexIndex)> &F); //Done : Tested
+                                        const std::function<bool(long vertexIndex)> &F,
+                                        int threadsCount = 1); //Done : Tested
 
     //private: 
 
     static VertexSubset EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
     
     static VertexSubset EdgeMapSparse(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
-                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
 
     static VertexSubset EdgeMapSparse_r(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C); // Trying reduction         
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); // Trying reduction         
 
     static VertexSubset EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
 
     static VertexSubset EdgeMapDenseWrite(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
-                                const std::function<bool(long vertexIndex)> &C); //Done : Tested
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
 
 
 };

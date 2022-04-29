@@ -15,18 +15,18 @@ int main(int argc, char** argv)
     //!Hard coding all the file Names;
     std::vector<std::string> fileNames;
     fileNames.emplace_back("tinyEWDlong.txt");
-    //fileNames.emplace_back("tinyEWD.txt");
+    fileNames.emplace_back("tinyEWD.txt");
     //fileNames.emplace_back("BFtest.txt");
-    //fileNames.emplace_back("mediumEWD.txt");
+//    fileNames.emplace_back("mediumEWD.txt");
     //fileNames.emplace_back("largeEWD.txt");
-    //fileNames.emplace_back("1000EWD.txt");
-    //fileNames.emplace_back("10000EWD.txt");
+//    fileNames.emplace_back("1000EWD.txt");
+//    fileNames.emplace_back("10000EWD.txt");
 
     //!Getting the current path
     auto currPath = std::filesystem::current_path().string();
 
 
-    const int maxThreads = 128;
+    const int maxThreads = 64;
 
 
     //!Array for short summary data:
@@ -51,15 +51,18 @@ int main(int argc, char** argv)
     {
         int currThreadsCount = iThreads;
 
-            std::fstream fileStream(logFile, std::ios::app);            
+           // std::fstream fileStream(logFile, std::ios::app);            
 
         for(size_t fileCount = 0; fileCount < fileNames.size(); ++fileCount)    //!Do all operations in this loop
         {
+//            std::cout << "Reached here1 f" << std::endl;
+
             auto currFileName = fileNames[fileCount];
             std::string currFileNameAppended =  std::string("/data/") + currFileName; //!Data extended
 
             //!Logging file path
             std::string fulLogPath = currPath + std::string("/test/log_") + std::string("num_threads_") + std::to_string(currThreadsCount) + std::string("_file_name_") + currFileName;
+
 
 
             std::fstream fileStream(fulLogPath, std::ios::out);
@@ -78,66 +81,66 @@ int main(int argc, char** argv)
             Test test(currThreadsCount, fulLogPath, fileStream);
             test.DoTestingOnThisGraph(currGraph, fulLogPath);
 
+//            std::cout << "Testing works" << std::endl; 
+
             //!At this point, for every graph, with given number of threads, some random calculations, have been done
 
 
-            //!Find maximum speed up element in bfs:
+            // //!Find maximum speed up element in bfs:
+            if(test.p_speedUpBFS.size() != 0)
+            {
+                auto bfs_max_speedup = std::max_element(test.p_speedUpBFS.begin(), test.p_speedUpBFS.end());
+                size_t index = bfs_max_speedup - test.p_speedUpBFS.begin();
+                g_threadsFileIndex.push_back(std::make_pair(currThreadsCount, fileCount));
+                g_seqParTimes.push_back(std::make_pair(test.p_seqTimesBFS[index],test.p_parallelTimesBFS[index]));
+                g_maxLayersCount.push_back(test.p_maxLayersCount[index]);
+                g_speedUps.push_back(test.p_speedUpBFS[index]);
+                g_sourceVertices.push_back(test.p_sourceVertices[index]);
+                g_compSuccess.push_back(test.p_comparisonSuccess[index]);
 
-            auto bfs_max_speedup = std::max_element(test.p_speedUpBFS.begin(), test.p_speedUpBFS.end());
-            auto index = std::distance(bfs_max_speedup, test.p_speedUpBFS.begin());
-
-            //!Push this data for BFS
-            g_threadsFileIndex.push_back(std::make_pair(currThreadsCount, fileCount));
-            g_seqParTimes.push_back(std::make_pmair(test.p_seqTimesBFS[index],test.p_parallelTimesBFS[index]));
-            g_maxLayersCount.push_back(test.p_maxLayersCount[index]);
-            g_speedUps.push_back(test.p_speedUpBFS[index]);
-            g_sourceVertices.push_back(test.p_sourceVertices[index]);
-            g_compSuccess.push_back(test.p_comparisonSuccess[index]);
-
-            auto bf_max_speedup = std::max_element(test.p_BF_speedUp.begin(), test.p_BF_speedUp.end());
-            auto bf_index = std::distance(bf_max_speedup, test.p_BF_speedUp.begin());
-
-            b_threadsFileIndex.push_back(std::make_pair(currThreadsCount, fileCount));
-            b_seqParTimes.push_back(std::make_pmair(test.p_BF_seqTimes[bf_index],test.p_BF_parTimes[bf_index]));
-            b_speedUps.push_back(p_BF_speedUp[bf_index]);
-            b_sourceVertices.push_back(test.p_BF_sourceVertices[bf_index]);
-            b_compSuccess.push_back(test.p_BF_comparisonSuccess[bf_index]);
-
-            int tempDebugVar = 0;
-
-
-
-
+            }
+            if(test.p_BF_speedUp.size() != 0)
+            {
+                auto bf_max_speedup = std::max_element(test.p_BF_speedUp.begin(), test.p_BF_speedUp.end());
+                size_t bf_index = bf_max_speedup - test.p_BF_speedUp.begin();
+                b_threadsFileIndex.push_back(std::make_pair(currThreadsCount, fileCount));
+                b_seqParTimes.push_back(std::make_pair(test.p_BF_seqTimes[bf_index],test.p_BF_parTimes[bf_index]));
+                b_speedUps.push_back(test.p_BF_speedUp[bf_index]);
+                b_sourceVertices.push_back(test.p_BF_sourceVertices[bf_index]);
+                b_compSuccess.push_back(test.p_BF_comparisonSuccess[bf_index]);
+            }
         }
     }
-
     //!Run it in the scope to automatically delete stream object early
-
     //!Printing summary of BFS
     {
-        std::string summaryBFSLog = currPath + std::string("/test/summary_bfs_log.txt");
-        std::fstream bfsstream(summaryBFSLog, std::ios::out);
-        //!Print the summary log
-        bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " LayersCountMax" << " Status" << std::endl;
-        for(int size_t i = 0; g_threadsFileIndex.size(); ++ i)
+        if(g_sourceVertices.size() != 0)
         {
-            bfsstream << fileNames[g_threadsFileIndex[i].second] << " " << g_threadsFileIndex[i].first << " " << g_sourceVertices[i] << " " << g_seqParTimes[i].first << " " << g_seqParTimes[i].second << " " << g_speedUps[i] << " " << g_maxLayersCount[i] << g_compSuccess[i] << endl;
+            std::string summaryBFSLog = currPath + std::string("/test/summary_bfs_log.txt");
+            std::fstream bfsstream(summaryBFSLog, std::ios::out);
+            //!Print the summary log
+            bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " LayersCountMax" << " Status" << std::endl;
+            for(size_t i = 0; i < g_threadsFileIndex.size(); ++ i)
+            {
+                bfsstream << fileNames[g_threadsFileIndex[i].second] << " " << g_threadsFileIndex[i].first << " " << g_sourceVertices[i] << " " << g_seqParTimes[i].first << " " << g_seqParTimes[i].second << " " << g_speedUps[i] << " " << g_maxLayersCount[i] << " "<<g_compSuccess[i] << std::endl;
+            }
         }
     }
-
-    //!Printing summary of BF    
+    //!Printing summary of BF
     {
-        std::string summaryBFLog = currPath + std::string("/test/summary_bf_log.txt");
-        std::fstream bfstream(summaryBFLog, std::ios::out);
-        //!Print the summary log
-        bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
-        for(int size_t i = 0; g_threadsFileIndex.size(); ++ i)
+        if(b_sourceVertices.size() != 0)
         {
-            bfsstream << fileNames[b_threadsFileIndex[i].second] << " " << b_threadsFileIndex[i].first << " " << b_sourceVertices[i] << " " << b_seqParTimes[i].first << " " << b_seqParTimes[i].second << " " << b_speedUps[i] << " " <<  b_compSuccess[i] << endl;
+            std::string summaryBFLog = currPath + std::string("/test/summary_bf_log.txt");
+            std::fstream bfstream(summaryBFLog, std::ios::out);
+            //!Print the summary log
+            bfstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
+            for(size_t i = 0; i < g_threadsFileIndex.size(); ++ i)
+            {
+                bfstream << fileNames[b_threadsFileIndex[i].second] << " " << b_threadsFileIndex[i].first << " " << b_sourceVertices[i] << " " << b_seqParTimes[i].first << " " << b_seqParTimes[i].second << " " << b_speedUps[i] << " " <<  b_compSuccess[i] << std::endl;
+            }
         }
     }
-//    std::cout << "Exited into main fxn" << std::endl;
-
+    std::cout << "Execution ended" << std::endl;
     return 0;
 }
 

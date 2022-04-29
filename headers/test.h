@@ -15,10 +15,12 @@ class Test
    public:
 
     //!Constructor
-    Test(int threads, std::string logPath, const std::fstream & stream);
+    Test(int threads, std::string logPath, std::fstream & stream);
    //bool FxnOddEven(long vertexId);
    //bool FxnOddEven_(long v1Id, long v2Id);
     std::vector<long> GenerateRandomIntegers(long minInteger, long maxInteger, long totalNumbers);
+
+
 
     void TestVertexSubset(Graph &g,
                           VertexSubset &vs,
@@ -28,9 +30,9 @@ class Test
     void DoTestingOnThisGraph(Graph &currGraph, std::string &logFile);
 
     //bool CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s);
-    bool CompareLayers(std::deque<long> &layers, std::deque<long> &layers_s);
+    bool CompareLayers(Graph &g, std::deque<long> &layers, std::deque<long> &layers_s);
     void TestBFS(Graph& currGraph, long root);
-    bool CompareSPs(std::deque<double> &SP, std::deque<double> & SP_s);
+    bool CompareSPs(Graph &g, std::deque<double> &SP, std::deque<double> & SP_s);
     void TestBF(Graph& currGraph, long root);
     //bool CompareLayers(long* layers, long* layers_s);
     //bool CompareParents(std::deque<std::atomic<long>> &parents, std::deque<long> &parents_s);
@@ -49,7 +51,7 @@ class Test
     private:
     int p_threadsCount;
     std::string p_logFilePath;
-    const std::fstream & p_currFileStream;
+    std::fstream & p_currFileStream;
 
 
     //!Temp Containers for storing data
