@@ -341,7 +341,7 @@ void Test::TestBF(Graph& currGraph, long root)
     
     auto startS = std::chrono::high_resolution_clock::now();
 
-    bellmanFord(currGraph, root, 1);   //!Call this seq with number of threds are 1
+    bellmanFord_s(currGraph, root);   //!Call this seq with number of threds are 1
     //bellmanFord_s(currGraph, root);
     //std::cout<<"Done Sequential\n";
 
