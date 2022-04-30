@@ -1,0 +1,7 @@
+File Name  SourceVertex ThreadsCount SeqTime ParTime SpeedUp Status
+largeEWD.txt 10663 2 50.5781 32.1805 1.5717 1
+largeEWD.txt 10663 4 50.5781 22.6796 2.23012 1
+largeEWD.txt 10663 8 50.5781 12.4477 4.06326 1
+largeEWD.txt 10663 16 50.5781 7.00061 7.22481 1
+largeEWD.txt 10663 32 50.5781 5.26812 9.6008 1
+largeEWD.txt 10663 64 50.5781 15.5623 3.25004 1
