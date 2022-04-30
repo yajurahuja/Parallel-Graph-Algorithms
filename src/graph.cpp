@@ -18,11 +18,19 @@ Graph::Graph(std::string &fileName)
     std::vector<int> vertices;
     std::vector<std::pair<int,int> > edges;
     std::vector<double> weights;
-    bool readingSuccess = AuxFxns::LoadGraphFromTxtFiles(0, 
-                                                         fileName, 
-                                                         vertices, 
-                                                         edges,
-                                                         weights);
+    //bool readingSuccess = AuxFxns::LoadGraphFromTxtFiles(0, 
+                                                        //  fileName, 
+                                                        //  vertices, 
+                                                        //  edges,
+                                                        //  weights);
+    bool readingSuccess = AuxFxns::LoadUndirectedGraphFromTxtFiles(0, 
+                                                                    fileName, 
+                                                                    vertices, 
+                                                                    edges,
+                                                                    weights);
+
+    if(readingSuccess)
+        std::cout << "Graph reading from " << fileName << " successful" << std::endl;
 
     //!Hash table fetching node id from node value
     std::unordered_map<int, int> table_dataValueToUniqueId;

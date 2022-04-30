@@ -18,7 +18,8 @@ int main(int argc, char** argv)
 //    fileNames.emplace_back("tinyEWD.txt");
     //fileNames.emplace_back("BFtest.txt");
 //    fileNames.emplace_back("mediumEWD.txt");
-      fileNames.emplace_back("largeEWD.txt");
+//      fileNames.emplace_back("largeEWD.txt");
+        fileNames.emplace_back("com-lj.ungraph.txt");
 //    fileNames.emplace_back("1000EWD.txt");
     //fileNames.emplace_back("10000EWD.txt");
 
