@@ -191,6 +191,20 @@ void Test::DoTestingOnThisGraph(Graph &currGraph)
         //!Testing BF
         TestBF(currGraph,currSource);
     }
+    // if(g_sourceVertices.size() != 0)
+    // {
+    //     std::string loggerName = std::string("/test/summary_bfs_") + p_dataFileName;
+    //     std::string summaryBFSLog = p_currPath + loggerName;
+    //     std::fstream bfsstream(summaryBFSLog, std::ios::out);
+    //     //!Print the summary log
+    //     bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " LayersCountMax" << " Status" << std::endl;
+    //     for(size_t i = 0; i < g_sourceVertices.size(); ++ i)
+    //     {
+    //         bfsstream << p_dataFileName << " " << g_threads[i] << " " << g_sourceVertices[i] << " " << g_seqParTimes[i].first << " " << g_seqParTimes[i].second << " " << g_speedUps[i] << " " <<  g_maxLayersCount[i] << " " << g_compSuccess[i] << std::endl;
+    //     }
+    // }
+
+
     if(b_sourceVertices.size() != 0)
     {
 //        std::string summaryBFSLog = p_currPath + std::string("_") +p_dataFileName + std::string("/test/summary_bf_log.txt");
@@ -199,7 +213,7 @@ void Test::DoTestingOnThisGraph(Graph &currGraph)
         std::fstream bfsstream(summaryBFSLog, std::ios::out);
         //!Print the summary log
         bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
-        for(size_t i = 0; i < g_sourceVertices.size(); ++ i)
+        for(size_t i = 0; i < b_sourceVertices.size(); ++ i)
         {
             bfsstream << p_dataFileName << " " << b_threads[i] << " " << b_sourceVertices[i] << " " << b_seqParTimes[i].first << " " << b_seqParTimes[i].second << " " << b_speedUps[i] << " "  << " " << b_compSuccess[i] << std::endl;
         }
