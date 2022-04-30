@@ -238,7 +238,7 @@ bool bellmanFord_s(const Graph &graph, long root)
 	while (frontier.getVertexSubsetLength() > 0 && round < size)
 	{
 		round += 1;
-		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate_s, &bfReset_s, threshhold);
+		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate_s, &bfReset_s,threshhold);
 		frontier = Interface::VertexMap(frontier, &bfReset_s);
 	}
 	if(round == size)
@@ -283,8 +283,8 @@ bool bellmanFord(const Graph &graph, long root, int threadsCount)
 	while (frontier.getVertexSubsetLength() > 0 && round < size)
 	{
 		round += 1;
-		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate, &bfReset, threshhold);
-		frontier = Interface::VertexMap(frontier, &bfReset);
+		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate, &bfReset, threshhold, threadsCount);
+		frontier = Interface::VertexMap(frontier, &bfReset, 1);
 	}
 	if(round == size)
 	{

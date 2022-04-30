@@ -70,7 +70,6 @@ class Interface
                                 const std::function<bool(long vertexIndex)> &C,
                                 int threadsCount = 1); //Done : Tested
   
-
     static VertexSubset EdgeMapDense(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,

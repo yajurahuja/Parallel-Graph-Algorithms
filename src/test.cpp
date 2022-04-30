@@ -36,10 +36,11 @@ bool OddEven_(long v1Id, long v2Id)
 //    return true;
 }
 
-Test::Test(int threads, std::string logPath, std::fstream & stream) : p_currFileStream(stream)
+Test::Test(std::string  &currPath,
+           std::string &dataFileName)
 {
-    p_threadsCount = threads;
-    p_logFilePath = logPath;
+    p_currPath = currPath;
+    p_dataFileName = dataFileName;
 }
 
 
@@ -157,100 +158,52 @@ void Test::TestVertexSubset(Graph &g,
 //     std::cout << std::endl;
 }
 
-void Test::DoTestingOnThisGraph(Graph &currGraph, std::string &logFile)
+void Test::DoTestingOnThisGraph(Graph &currGraph)
 {
     long verticesCount = currGraph.getNumberVertices();
 
-    std::vector<long> individualSubsetSizes;
-    for(int i = 1; i <= 10; ++i)
-    {
-        long subSetSize = std::ceil(verticesCount * i * 10./100);
-        individualSubsetSizes.push_back(subSetSize);
-    }
-    individualSubsetSizes.erase(std::unique(individualSubsetSizes.begin(), individualSubsetSizes.end()), individualSubsetSizes.end());
-
     //!Select 30 percent of nodes at random
-    std::vector<long> randomSourcesIndeices = GenerateRandomIntegers(0, verticesCount - 1,std::floor(verticesCount * 3/10));
-
-//    std::cout << "Sources Count: " << randomSourcesIndeices.size() << std::endl;
+//    std::vector<long> randomSourcesIndeices = GenerateRandomIntegers(0, verticesCount - 1,std::floor(verticesCount * 5/10));
+    std::vector<long> randomSourcesIndeices = GenerateRandomIntegers(0, verticesCount - 1,std::floor(10));    
+    //std::vector<long> randomSourcesIndeices {1};
+    //! Looping over every source node
     // for(auto currSource: randomSourcesIndeices)
     // {
-    //     std::cout << currSource << std::endl;
+    //     Tesgit tBFS(currGraph,currSource);
     // }
 
+    // if(g_sourceVertices.size() != 0)
+    // {
+    //     std::string loggerName = std::string("/test/summary_bfs_") + p_dataFileName;
+    //     std::string summaryBFSLog = p_currPath + loggerName;
+    //     std::fstream bfsstream(summaryBFSLog, std::ios::out);
+    //     //!Print the summary log
+    //     bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " LayersCountMax" << " Status" << std::endl;
+    //     for(size_t i = 0; i < g_sourceVertices.size(); ++ i)
+    //     {
+    //         bfsstream << p_dataFileName << " " << g_threads[i] << " " << g_sourceVertices[i] << " " << g_seqParTimes[i].first << " " << g_seqParTimes[i].second << " " << g_speedUps[i] << " " <<  g_maxLayersCount[i] << " " << g_compSuccess[i] << std::endl;
+    //     }
+    // }
+
+    // //!BF
     for(auto currSource: randomSourcesIndeices)
     {
-        p_currFileStream << "Current Source Index " << currSource << std::endl; 
-
-        //!Testing BFS
-        p_currFileStream << "Testing BFS" << std::endl; 
-        TestBFS(currGraph,currSource);
-
-        //!BF
-        p_currFileStream << std::endl; 
-        p_currFileStream << std::endl;        
-        p_currFileStream << "Testing BF" << std::endl; 
         //!Testing BF
         TestBF(currGraph,currSource);
-
-
-        p_currFileStream << std::endl; 
-        p_currFileStream << std::endl;
-        p_currFileStream << std::endl; 
-        p_currFileStream << std::endl;
     }
-
-    //!When done for all sources and other shit
-    p_currFileStream << std::endl; 
-    p_currFileStream << std::endl;
-    p_currFileStream << "Final Log --> Summary" << std::endl;    
-    p_currFileStream << "BFS" << std::endl;    
-    for(int j = 0; j < p_BF_parTimes.size(); ++j)
+    if(b_sourceVertices.size() != 0)
     {
-        p_currFileStream << "Source Vertex:" << currGraph.getVertexPointer(p_sourceVertices[j])->getDataValue() << " | Success: " << p_comparisonSuccess[j] << " | Seq Time: " << p_seqTimesBFS[j] << " | Parallel Time: " << p_parallelTimesBFS[j] << " | SpeedUp: " << p_speedUpBFS[j] << " | Max Layers at dist: " << p_maxLayersCount[j] << std::endl;
+//        std::string summaryBFSLog = p_currPath + std::string("_") +p_dataFileName + std::string("/test/summary_bf_log.txt");
+        std::string loggerName = std::string("/test/summary__bf_") + p_dataFileName;
+        std::string summaryBFSLog = p_currPath + loggerName;
+        std::fstream bfsstream(summaryBFSLog, std::ios::out);
+        //!Print the summary log
+        bfsstream << "File Name " << " ThreadsCount" << " SourceVertex" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
+        for(size_t i = 0; i < g_sourceVertices.size(); ++ i)
+        {
+            bfsstream << p_dataFileName << " " << b_threads[i] << " " << b_sourceVertices[i] << " " << b_seqParTimes[i].first << " " << b_seqParTimes[i].second << " " << b_speedUps[i] << " "  << " " << b_compSuccess[i] << std::endl;
+        }
     }
-
-//    std::cout <<"Somewhere in middle" << std::endl;
-
-    p_currFileStream << "BF" << std::endl;    
-    for(int j = 0; j < p_BF_parTimes.size(); ++j)
-    {
-        p_currFileStream << "Source Vertex:" << currGraph.getVertexPointer(p_BF_sourceVertices[j])->getDataValue() << " | Success: " << p_BF_comparisonSuccess[j] << " | Seq Time: " << p_BF_seqTimes[j] << " | Parallel Time: " << p_BF_parTimes[j] << " | SpeedUp: " << p_BF_speedUp[j] << std::endl;
-    }
-
-//    std::cout <<"Somewhere in middle again" << std::endl;
-
-
-    // std::cout << "Running Seq" << std::endl;
-    // bfs_s(currGraph,0);
-    // std::cout << "Running Parallel" << std::endl;
-    // bfs(currGraph,0);
-//     for(int i = 0; i < 1; ++i)
-//     {
-// //        std::cout << "New Call" << " Root: " << i << std::endl;
-//         TestBF(currGraph,i);
-// //        std::cout << "   " << std::endl;        
-//     }
-
-
-    // for(auto &subSetSize : individualSubsetSizes)
-    // {
-    //     VertexSubset vs;
-
-    //     std::fstream fileStream(logFile, std::ios::app);
-    //     //fileStream << "Beginning of the testing on this graph function" << std::endl;
-    //     fileStream << " " << std::endl;
-    //     //fileStream << "Percentage of nodes selected for subset: "  << i * 10 << "%" <<std::endl;
-
-    //     TestVertexSubset(currGraph,
-    //                      vs,
-    //                      subSetSize,
-    //                      logFile);
-
-    //     //fileStream << "Ending of the testing on this graph function" << std::endl;
-    //     fileStream << " " << std::endl;
-    //     //break;
-    // }
 }
 
 
@@ -261,7 +214,7 @@ bool Test::CompareLayers(Graph &currGraph, std::deque<long> &layers, std::deque<
     {
         if(layers[i] != layers_s[i])
         {
-            p_currFileStream << "Layers MisMatch at vertex" <<i  << " |Data val: " << currGraph.getVertexPointer(i)->getDataValue() <<std::endl;
+//            p_currFileStream << "Layers MisMatch at vertex" <<i  << " |Data val: " << currGraph.getVertexPointer(i)->getDataValue() <<std::endl;
             //std::cout<<"Layers MisMatch at vertex"<<i<<std::endl;
             return false;
         }           
@@ -282,36 +235,77 @@ void Test::TestBFS(Graph& currGraph, long root)
 
     auto startS = std::chrono::high_resolution_clock::now();
     bfs_s(currGraph, root);
-    
-    //std::cout<<"Done Sequential\n";
+    auto startE = std::chrono::high_resolution_clock::now();
+    auto seqT = std::chrono::duration<double>(startE - startS);
 
-    auto startP = std::chrono::high_resolution_clock::now();
-    bfs(currGraph, root, p_threadsCount);
-    auto end = std::chrono::high_resolution_clock::now();
+    std::vector<int> p_numThreads;
+    std::vector<double> p_parallelTimesBFS;
+    std::vector<double> p_speedUpBFS;
+    std::vector<long>   p_maxLayersCount;
+    std::vector<bool> p_comparisonSuccess;
 
+    std::string fulLogPath = p_currPath + std::string("/test/log_bfs_") + std::string("source_index_") + std::to_string(root) + std::string("_file_name_") + p_dataFileName;
+    std::fstream fileStream(fulLogPath, std::ios::out);
 
-    auto seqT = std::chrono::duration<double>(startP - startS);
-    auto parallelT = std::chrono::duration<double>(end - startP);
+//    fileStream << "================" << std::endl;
+//    fileStream << "================" << std::endl;
+//    fileStream << "New Run" << std::endl;
+//    fileStream << "Current Source Index " << root << std::endl; 
+//    fileStream << "Testing BFS" << std::endl; 
+    fileStream << "File Name " << " SourceVertex" << " ThreadsCount" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
+    //!Looping over threads
+    const int maxThreads = 64;
+    std::vector<int> threads {2,4,8,16,32,64};
 
-    //std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
-    //p_currFileStream << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
-
-    auto maxElemIter = std::max_element(layers.begin(), layers.end());
-
-    p_sourceVertices.push_back(root);
-    p_seqTimesBFS.push_back(seqT.count());
-    p_parallelTimesBFS.push_back(parallelT.count());
-    p_speedUpBFS.push_back(seqT.count()/parallelT.count());
-    p_maxLayersCount.push_back(*maxElemIter);
-
-    bool compSuccess = CompareLayers(currGraph, layers, layers_s);
-    if(compSuccess)
+//    for(int iThreads = 1; iThreads <= maxThreads; ++iThreads)
+    for(auto currThreadsCount : threads)
+//    for(int iThreads = 1; iThreads <= maxThreads; ++iThreads)    
     {
-        p_currFileStream << "Correctly ran for source vertex: " << root <<" |Data val: " << currGraph.getVertexPointer(root)->getDataValue() <<std::endl;
-    }
-    p_comparisonSuccess.push_back(compSuccess);
+        //int currThreadsCount = iThreads;
+        //!Testing BFS
+        auto startP = std::chrono::high_resolution_clock::now();
+        bfs(currGraph, root, currThreadsCount);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto parallelT = std::chrono::duration<double>(end - startP);
 
-//    std::cout << "Exiting test bfs" << std::endl;
+        auto maxElemIter = std::max_element(layers.begin(), layers.end());
+
+        //!Will be pushed each time with number of threads
+        p_numThreads.push_back(currThreadsCount);
+        p_parallelTimesBFS.push_back(parallelT.count());
+        p_speedUpBFS.push_back(seqT.count()/parallelT.count());
+        p_maxLayersCount.push_back(*maxElemIter);
+
+        bool compSuccess = CompareLayers(currGraph, layers, layers_s);
+        if(compSuccess)
+        {
+            //fileStream << "Correctly ran for source vertex: " << root <<" |Data val: " << currGraph.getVertexPointer(root)->getDataValue() <<std::endl;
+
+        }
+        else
+        {
+            fileStream << "Layers MisMatch at vertex" << root  << " |Data val: " << currGraph.getVertexPointer(root)->getDataValue() <<std::endl;
+        }
+        p_comparisonSuccess.push_back(compSuccess);
+//        fileStream << std::endl; 
+//        fileStream << std::endl;
+        fileStream << p_dataFileName << " " << root<< " " << currThreadsCount << " " << seqT.count() << " " << parallelT.count() << " " << seqT.count()/parallelT.count() << " " <<  compSuccess << std::endl;
+    }
+
+
+    // //!Find maximum speed up element in bfs:
+    if(p_speedUpBFS.size() != 0)
+    {
+        auto bfs_max_speedup = std::max_element(p_speedUpBFS.begin(), p_speedUpBFS.end());
+        size_t index = bfs_max_speedup - p_speedUpBFS.begin();
+
+        g_threads.push_back(p_numThreads[index]);
+        g_seqParTimes.push_back(std::make_pair(seqT.count(),p_parallelTimesBFS[index]));
+        g_sourceVertices.push_back(currGraph.getVertexPointer(root)->getDataValue());
+        g_maxLayersCount.push_back(p_maxLayersCount[index]);
+        g_speedUps.push_back(p_speedUpBFS[index]);
+        g_compSuccess.push_back(p_comparisonSuccess[index]);
+    }
 }
 
 
@@ -322,7 +316,7 @@ bool Test::CompareSPs(Graph &currGraph, std::deque<double> &SP, std::deque<doubl
         if(SP[i] != SP_s[i])
         {
             //std::cout<<"SP MisMatch at vertex "<<i<<std::endl; 
-            p_currFileStream <<"BF -> SP MisMatch at vertex: "<<i  << " |Data val: " << currGraph.getVertexPointer(i)->getDataValue() <<std::endl; 
+//            p_currFileStream <<"BF -> SP MisMatch at vertex: "<<i  << " |Data val: " << currGraph.getVertexPointer(i)->getDataValue() <<std::endl; 
             return false;
         }
            
@@ -340,31 +334,62 @@ void Test::TestBF(Graph& currGraph, long root)
     //std::cout<<"It all starts here\n";
     
     auto startS = std::chrono::high_resolution_clock::now();
-
     bellmanFord_s(currGraph, root);   //!Call this seq with number of threds are 1
-    //bellmanFord_s(currGraph, root);
-    //std::cout<<"Done Sequential\n";
+    auto startE = std::chrono::high_resolution_clock::now();
+    auto seqT = std::chrono::duration<double>(startE - startS);
 
-    auto startP = std::chrono::high_resolution_clock::now();
-
-
-    bellmanFord(currGraph, root, p_threadsCount);   //!Parallel with num of threads more than 1
-    auto end = std::chrono::high_resolution_clock::now();
-    auto seqT = std::chrono::duration<double>(startP - startS);
-    auto parallelT = std::chrono::duration<double>(end - startP);
-
-    //std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
-    bool compSuccess = CompareSPs(currGraph, SP, SP_s);
+    std::string fulLogPath = p_currPath + std::string("/test/log_bf_") + std::string("source_index_") + std::to_string(root) + std::string("_file_name_") + p_dataFileName;
+    std::fstream fileStream(fulLogPath, std::ios::out);
 
 
-    p_BF_sourceVertices.push_back(root);
-    p_BF_seqTimes.push_back(seqT.count());
-    p_BF_parTimes.push_back(parallelT.count());
-    p_BF_speedUp.push_back(seqT.count()/parallelT.count());
+    std::vector<int> p_numThreads;
+    std::vector<double> p_parallelTimesBFS;
+    std::vector<double> p_speedUpBFS;
+    std::vector<bool> p_comparisonSuccess;
+//    fileStream << "Testing BF" << std::endl; 
 
-    if(compSuccess)
+    //!Looping over threads
+    const int maxThreads = 64;
+    std::vector<int> threads {2,4,8,16,32,64};
+    fileStream << "File Name "  << " SourceVertex" << " ThreadsCount" << " SeqTime" << " ParTime" << " SpeedUp" << " Status" << std::endl;
+    for(auto currThreadsCount : threads)
+//    for(int iThreads = 1; iThreads <= maxThreads; ++iThreads)
     {
-        p_currFileStream << "BF --> Correctly ran for source vertex: " << root << " |Data val: " << currGraph.getVertexPointer(root)->getDataValue() <<std::endl;
+        auto startP = std::chrono::high_resolution_clock::now();
+        bellmanFord(currGraph, root, currThreadsCount);   //!Parallel with num of threads more than 1
+        auto end = std::chrono::high_resolution_clock::now();
+        auto parallelT = std::chrono::duration<double>(end - startP);
+
+        //std::cout << "Seq Time: " << seqT.count() << " Parallel Time: " << parallelT.count() << std::endl;
+        bool compSuccess = CompareSPs(currGraph, SP, SP_s);
+
+        p_numThreads.push_back(currThreadsCount);
+        p_parallelTimesBFS.push_back(parallelT.count());
+        p_speedUpBFS.push_back(seqT.count()/parallelT.count());
+        if(compSuccess)
+        {
+            int temp = 0;
+        }
+        else
+        {
+            fileStream <<"BF -> SP MisMatch at vertex: "<<root  << " |Data val: " << currGraph.getVertexPointer(root)->getDataValue() <<std::endl; 
+        }
+        p_BF_comparisonSuccess.push_back(compSuccess);
+        fileStream << p_dataFileName << " " << root << " " << currThreadsCount << " " << seqT.count() << " " << parallelT.count() << " " << seqT.count()/parallelT.count() << " " <<  compSuccess << std::endl;
     }
-    p_BF_comparisonSuccess.push_back(compSuccess);
+
+    // //!Find maximum speed up element in bf:
+    if(p_speedUpBFS.size() != 0)
+    {
+        auto bfs_max_speedup = std::max_element(p_speedUpBFS.begin(), p_speedUpBFS.end());
+        size_t index = bfs_max_speedup - p_speedUpBFS.begin();
+
+        b_threads.push_back(p_numThreads[index]);
+  
+        b_seqParTimes.push_back(std::make_pair(seqT.count(),p_parallelTimesBFS[index]));
+        b_sourceVertices.push_back(currGraph.getVertexPointer(root)->getDataValue());
+        b_speedUps.push_back(p_speedUpBFS[index]);
+        b_compSuccess.push_back(p_BF_comparisonSuccess[index]);
+    }
+
 }
