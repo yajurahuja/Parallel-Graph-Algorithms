@@ -15,7 +15,8 @@ class Test
    public:
 
     //!Constructor
-    Test(int threads, std::string logPath, std::fstream & stream);
+    Test(std::string  &currPath,
+        std::string &dataFileName);
    //bool FxnOddEven(long vertexId);
    //bool FxnOddEven_(long v1Id, long v2Id);
     std::vector<long> GenerateRandomIntegers(long minInteger, long maxInteger, long totalNumbers);
@@ -27,7 +28,7 @@ class Test
                           long nodesCountInSubset,
                           std::string &logFile);
 
-    void DoTestingOnThisGraph(Graph &currGraph, std::string &logFile);
+    void DoTestingOnThisGraph(Graph &currGraph);
 
     //bool CompareLayers(std::deque<std::atomic<long>> &layers, std::deque<long> &layers_s);
     bool CompareLayers(Graph &g, std::deque<long> &layers, std::deque<long> &layers_s);
@@ -49,9 +50,12 @@ class Test
     //                        std::function<bool(long id1, long id2)>);
 
     private:
-    int p_threadsCount;
-    std::string p_logFilePath;
-    std::fstream & p_currFileStream;
+//    int p_threadsCount;
+//    std::string p_logFilePath;
+//    std::fstream & p_currFileStream;
+
+    std::string  p_currPath;
+    std::string p_dataFileName;
 
 
     //!Temp Containers for storing data
@@ -60,12 +64,12 @@ class Test
 
     public: //Making it public, use it wisrely
 
-    std::vector<long> p_sourceVertices;
-    std::vector<double> p_seqTimesBFS;
-    std::vector<double> p_parallelTimesBFS;
-    std::vector<double> p_speedUpBFS;
-    std::vector<long>   p_maxLayersCount;
-    std::vector<bool> p_comparisonSuccess;
+    // std::vector<long> p_sourceVertices;
+    // std::vector<double> p_seqTimesBFS;
+    // std::vector<double> p_parallelTimesBFS;
+    // std::vector<double> p_speedUpBFS;
+    // std::vector<long>   p_maxLayersCount;
+    // std::vector<bool> p_comparisonSuccess;
 
     //!These are for BF
     //!These are for bfs: //!Note that
@@ -75,6 +79,21 @@ class Test
     std::vector<double> p_BF_parTimes;
     std::vector<double> p_BF_speedUp;
     std::vector<bool> p_BF_comparisonSuccess;
+
+    //!Array for short summary data:
+    std::vector<int> g_threads;
+    std::vector<std::pair<double, double> > g_seqParTimes;
+    std::vector<long>g_sourceVertices;
+    std::vector<int> g_maxLayersCount;
+    std::vector<int> g_speedUps;
+    std::vector<bool> g_compSuccess;
+
+    // //!For Bellman Ford
+    std::vector<int> b_threads;
+    std::vector<std::pair<double, double> > b_seqParTimes;
+    std::vector<long>b_sourceVertices;
+    std::vector<int> b_speedUps;
+    std::vector<bool> b_compSuccess;
 
 };
 
