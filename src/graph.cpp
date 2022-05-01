@@ -18,6 +18,7 @@ Graph::Graph(std::string &fileName)
     std::vector<long> vertices;
     std::vector<std::pair<long,long> > edges;
     std::vector<double> weights;
+
     // bool readingSuccess = AuxFxns::LoadGraphFromTxtFiles(0, 
     //                                                      fileName, 
     //                                                      vertices, 

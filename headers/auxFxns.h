@@ -20,6 +20,12 @@ class AuxFxns
                                 std::vector<std::pair<long , long> > &edges,
                                 std::vector<double> &weights);
 
+    static bool LoadUndirectedGraphFromTxtFiles(long graphNumber, 
+                                    const std::string &filename, 
+                                    std::vector<int> &vertices,
+                                    std::vector<std::pair<int, int> > &edges,
+                                    std::vector<double> &weights);
+
 };
 
 #endif
