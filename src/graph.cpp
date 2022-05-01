@@ -15,46 +15,49 @@ Graph::Graph(std::string &fileName)
 {
     VertexIdTracker::getInstance();
 
-    std::vector<int> vertices;
-    std::vector<std::pair<int,int> > edges;
+    std::vector<long> vertices;
+    std::vector<std::pair<long,long> > edges;
     std::vector<double> weights;
-    //bool readingSuccess = AuxFxns::LoadGraphFromTxtFiles(0, 
-                                                        //  fileName, 
-                                                        //  vertices, 
-                                                        //  edges,
-                                                        //  weights);
-    bool readingSuccess = AuxFxns::LoadUndirectedGraphFromTxtFiles(0, 
-                                                                    fileName, 
-                                                                    vertices, 
-                                                                    edges,
-                                                                    weights);
 
-    if(readingSuccess)
-        std::cout << "Graph reading from " << fileName << " successful" << std::endl;
+    // bool readingSuccess = AuxFxns::LoadGraphFromTxtFiles(0, 
+    //                                                      fileName, 
+    //                                                      vertices, 
+    //                                                      edges,
+    //                                                      weights);
+
+    bool readingSuccess = AuxFxns::LoadUndirectedGraphFromTxtFiles(0, 
+                                                                     fileName, 
+                                                                     vertices, 
+                                                                     edges,
+                                                                     weights);
+
+     if(readingSuccess)
+         std::cout << "Graph reading from " << fileName << " successful" << std::endl;
 
     //!Hash table fetching node id from node value
-    std::unordered_map<int, int> table_dataValueToUniqueId;
+    std::unordered_map<long, long> table_dataValueToUniqueId;
     //!Adding vertices to the graph
-    for(int nodeIndex = 0; nodeIndex < vertices.size(); ++nodeIndex)
+    for(long nodeIndex = 0; nodeIndex < vertices.size(); ++nodeIndex)
     {
         std::shared_ptr<Vertex> newVertex =  std::make_shared<Vertex>(vertices[nodeIndex]);
         AddNodeInGraph(VertexIdTracker::getInstance()->GetLastGeneratedIdIndex(), newVertex);
         table_dataValueToUniqueId.insert({newVertex->getDataValue(),VertexIdTracker::getInstance()->GetLastGeneratedIdIndex()});
     }
     //!Adding edges to the graph and stoding vertex neighbourhood
-    for(int edgeIndex = 0; edgeIndex < edges.size(); ++edgeIndex)
+    for(long edgeIndex = 0; edgeIndex < edges.size(); ++edgeIndex)
     {
-        int firstNodeDataValue = edges[edgeIndex].first;
-        int secondNodeDataValue = edges[edgeIndex].second;
+        long firstNodeDataValue = edges[edgeIndex].first;
+        long secondNodeDataValue = edges[edgeIndex].second;
         double weight = weights[edgeIndex];
         std::shared_ptr<Edge> currEdge = std::make_shared<Edge>(table_dataValueToUniqueId[firstNodeDataValue],
                                                                     table_dataValueToUniqueId[secondNodeDataValue],
                                                                     weight);
         AddEdgeInGraph(currEdge);
     }
+    
 }
 
-bool Graph::AddNodeInGraph(int uniqueNodeId, std::shared_ptr<Vertex> &node)
+bool Graph::AddNodeInGraph(long uniqueNodeId, std::shared_ptr<Vertex> &node)
 {
     p_table_uniqueNodeToVertex.insert({uniqueNodeId, node});
     return true;

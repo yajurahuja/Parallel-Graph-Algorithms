@@ -50,11 +50,26 @@ class Interface
                             const std::function<bool(long vertexIndex)> &C, long threshold,
                             int threadsCount = 1); //Done : Tested
 
+
+    static VertexSubset EdgeMap_t(const Graph &graph,
+                            const VertexSubset &U,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                            const std::function<bool(long vertexIndex)> &C, long threshold,
+                            int threadsCount = 1); //Done : Tested
     
+    static VertexSubset EdgeMap_t(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
+                                const std::function<bool(long vertexIndex)> &C, long threshold,
+                                int threadsCount = 1); //Done : Tested
 
     static VertexSubset VertexMap(const VertexSubset &U, 
                                         const std::function<bool(long vertexIndex)> &F,
                                         int threadsCount = 1); //Done : Tested
+
+    static VertexSubset VertexMap_t(const VertexSubset &U, 
+                                    const std::function<bool(long vertexIndex)> &F,
+                                    int threadsCount = 1); //Done : Tested
 
     //private: 
 
@@ -65,6 +80,18 @@ class Interface
                                 int threadsCount = 1); //Done : Tested
     
     static VertexSubset EdgeMapSparse(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
+
+    static VertexSubset EdgeMapSparse_t(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount = 1); //Done : Tested
+
+    static VertexSubset EdgeMapSparse_t(const Graph &graph,
                                 const VertexSubset &U,
                                 const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                                 const std::function<bool(long vertexIndex)> &C,

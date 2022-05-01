@@ -1,6 +1,8 @@
 #include "../headers/allHeaders.h"
 #include <algorithm>
 
+long total;
+long iterations;
 
 std::set<long> Interface::convertToSet(std::vector<long> &v)
 {
@@ -32,6 +34,16 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
     return EdgeMapSparse(graph, U, F, C, threadsCount);
 }
 
+VertexSubset Interface::EdgeMap_t(const Graph &graph,
+                            const VertexSubset &U,
+                            const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
+                            const std::function<bool(long vertexIndex)> &C, long threshold,
+                            int threadsCount)
+{
+    return EdgeMapSparse_t(graph, U, F, C, threadsCount);
+}
+
+
 
 VertexSubset Interface::EdgeMap(const Graph &graph,
                                 const VertexSubset &U,
@@ -46,12 +58,28 @@ VertexSubset Interface::EdgeMap(const Graph &graph,
         return EdgeMapSparse(graph, U, F, C, threadsCount);
 }
 
+
+VertexSubset Interface::EdgeMap_t(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C, long threshold,
+                                int threadsCount)
+{
+    // if(U.getVertexSubsetLength() + U.getVertexSubsetOutDegree(graph) > threshold)
+    //     return EdgeMapDense(graph, U, F, C);
+    // else
+        //return EdgeMapSparse(graph, U, F, C);
+        return EdgeMapSparse_t(graph, U, F, C, threadsCount);
+}
+
 VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                             const VertexSubset &U,
                             const std::function<bool(long startVertexIndex, long endVertexIndex, double edgeWeight)> &F,
                             const std::function<bool(long vertexIndex)> &C,
                             int threadsCount) //Done : Tested
 {
+    // total += U.getVertexSubsetLength();
+    // iterations++;
     VertexSubset Out; 
     size_t *prefix;
     #pragma omp parallel num_threads(threadsCount)
@@ -74,7 +102,9 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
             for(long ngh = 0; ngh < oSize; ngh++)
             {   
                 if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh), graph.getEdgeWeight(curr, v_->getOutNeighboursEl(ngh))))
+                {
                     vec_private.push_back(v_->getOutNeighboursEl(ngh)); 
+                }
             }
         }
         prefix[ithread + 1] = vec_private.size();    
@@ -93,6 +123,8 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
     
     std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
     Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+    total += Out.getVertexSubsetLength();
+    iterations++;
     //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
     return Out;
 }
@@ -103,6 +135,7 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
                                 const std::function<bool(long vertexIndex)> &C,
                                 int threadsCount)
 {
+
     VertexSubset Out; 
     size_t *prefix;
     #pragma omp parallel num_threads(threadsCount)
@@ -125,7 +158,9 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
             for(long ngh = 0; ngh < oSize; ngh++)
             {   
                 if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh)))
+                {
                     vec_private.push_back(v_->getOutNeighboursEl(ngh)); 
+                }
             }
         }
         prefix[ithread + 1] = vec_private.size();    
@@ -143,9 +178,83 @@ VertexSubset Interface::EdgeMapSparse(const Graph &graph,
     
     std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
     Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+
+    total += Out.getVertexSubsetLength();
+    iterations++;
     //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
     return Out;
 }
+
+
+VertexSubset Interface::EdgeMapSparse_t(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex)> &F,
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
+{
+    VertexSubset Out; 
+    #pragma omp parallel num_threads(threadsCount)
+    {
+        #pragma omp for nowait
+        for(long v = 0; v < U.getVertexSubsetLength(); v++)
+        {
+            long curr = U.getVertexAt(v);
+            Vertex* v_ = graph.getVertexPointer(curr);
+
+            long oSize = v_->getOutDegree();
+            for(long ngh = 0; ngh < oSize; ngh++)
+            {   
+                if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh)))
+                {
+                    #pragma omp critical
+                    Out.getVertexSubset().push_back(v_->getOutNeighboursEl(ngh)); 
+                }
+            }
+        }
+    }
+    
+    std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
+    Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+
+    total += Out.getVertexSubsetLength();
+    iterations++;
+    //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
+    return Out;
+}
+
+
+VertexSubset Interface::EdgeMapSparse_t(const Graph &graph,
+                                const VertexSubset &U,
+                                const std::function<bool(long startVertexIndex, long endVertexIndex, double weight)> &F,
+                                const std::function<bool(long vertexIndex)> &C,
+                                int threadsCount)
+{
+    VertexSubset Out; 
+        for(long v = 0; v < U.getVertexSubsetLength(); v++)
+        {
+            long curr = U.getVertexAt(v);
+            Vertex* v_ = graph.getVertexPointer(curr);
+
+            long oSize = v_->getOutDegree();
+            for(long ngh = 0; ngh < oSize; ngh++)
+            {   
+                if(C(v_->getOutNeighboursEl(ngh)) && F(curr, v_->getOutNeighboursEl(ngh), graph.getEdgeWeight(curr, v_->getOutNeighboursEl(ngh))))
+                {
+
+                    Out.getVertexSubset().push_back(v_->getOutNeighboursEl(ngh)); 
+                }
+            }
+        }
+    
+    std::sort(Out.getVertexSubset().begin(), Out.getVertexSubset().end());
+    Out.getVertexSubset().erase(std::unique(Out.getVertexSubset().begin(), Out.getVertexSubset().end()), Out.getVertexSubset().end());
+
+    total += Out.getVertexSubsetLength();
+    iterations++;
+    //RemoveDuplicates(Out); //TO DO: confirm if it remains in the scope
+    return Out;
+}
+
 
 //To Do: Does it need to iterate from i = 1...|V| or can we do it in the way it is stored in the map
 
@@ -235,5 +344,22 @@ VertexSubset Interface::VertexMap(const VertexSubset &U,
         std::copy(vec_private.begin(), vec_private.end(), Out.getVertexSubset().begin() + prefix[ithread]);
     }
     delete prefix;
+    return Out;
+}   
+
+
+VertexSubset Interface::VertexMap_t(const VertexSubset &U,
+                                  const std::function<bool(long vertexIndex)> &F,
+                                  int threadsCount)
+{
+    VertexSubset Out;
+    for(auto v = U.getVertexSubsetBegin(); v < U.getVertexSubsetEnd(); v++)
+    {
+            if(F(*v))
+            {   
+                Out.getVertexSubset().push_back(*v);
+            }
+    }
+  
     return Out;
 }   

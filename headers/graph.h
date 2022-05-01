@@ -36,7 +36,7 @@ class Graph
     Graph(std::string &fileName);
     ~Graph();
 
-    bool AddNodeInGraph(int uniqueNodeId, std::shared_ptr<Vertex> &node);
+    bool AddNodeInGraph(long uniqueNodeId, std::shared_ptr<Vertex> &node);
 
     bool AddEdgeInGraph(std::shared_ptr<Edge> &edge);//Done
     std::unordered_map<int, std::shared_ptr<Vertex> > getGraphTable(); //TO DO

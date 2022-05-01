@@ -33,8 +33,8 @@ bool AuxFxns::LoadGraphFromJason(long graphNumber, const std::string &filename, 
 
 bool AuxFxns::LoadGraphFromTxtFiles(long graphNumber, 
                                     const std::string &filename, 
-                                    std::vector<int> &vertices, 
-                                    std::vector<std::pair<int, int> > &edges,
+                                    std::vector<long> &vertices, 
+                                    std::vector<std::pair<long, long> > &edges,
                                     std::vector<double> &weights)
 {
     //!Import Text File and Read it
@@ -79,12 +79,11 @@ bool AuxFxns::LoadGraphFromTxtFiles(long graphNumber,
 
         lineNo++;        
     }
+    
     return true;    
-
-
-
-
 }
+
+
 
 
 bool AuxFxns::LoadUndirectedGraphFromTxtFiles(long graphNumber, 
