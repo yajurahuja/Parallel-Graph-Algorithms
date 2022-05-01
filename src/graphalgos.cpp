@@ -1,8 +1,7 @@
 #include "../headers/allHeaders.h"
 
 
-// std::deque<std::atomic<long>> parents;
-// std::deque<std::atomic<long>> layers;
+
 std::deque<long> parents;
 std::deque<long> layers;
 std::deque<long> parents_s;
@@ -11,8 +10,10 @@ std::deque<long> layers_s;
 // long* layers;
 // long* parents_s;
 // long* layers_s;
-// std::deque<long> IDs;
-// std::deque<long> prevIDs;
+std::deque<long> IDs;
+std::deque<long> prevIDs;
+std::deque<long> IDs_s;
+std::deque<long> prevIDs_s;
 //Bellman Ford
 std::deque<double> SP;
 std::deque<long> Visited;
@@ -138,31 +139,108 @@ void bfs(const Graph &graph, long root, int threadsCount)
 }
 
 
+//Better approach
+void bfs_t(const Graph &graph, long root, int threadsCount)
+{
+	long size = graph.getNumberVertices();
+	parents.resize(size);
+	layers.resize(size);
+
+	#pragma omp parallel for
+    for(int i = 0; i < size; i++)
+	{
+        parents[i] = -1;
+		layers[i] = -1;
+	}
+    long threshhold = 0; //set the threshhold
+    parents[root] = root; //set the root's parent to itself
+	layers[root] = 0; //set the layer of root to 0
+	VertexSubset frontier(root);
+	long layer = 1;
+	while(frontier.getVertexSubsetLength() > 0)
+	{
+//	std::cout << "Inside bfs 2" << std::endl;
+		frontier = Interface::EdgeMap_t(graph, frontier, &update, &cond, threshhold, threadsCount);
+		//TO DO: parallel
+		for(auto v = frontier.getVertexSubsetBegin(); v < frontier.getVertexSubsetEnd(); v++)
+			layers[*v] = layers[parents[*v]] + 1;
+		layer += 1;
+	}
+	return;
+}
 
 
-// //Connected Components
-// bool CCUpdate(long s, long d)
-// {
-// 	long origId = IDs[d];
-// 	if(writeMin(&IDs[d], IDs[s]))
-// 		return (origId == prevIDs[d]);
-// 	return true;
-// }
-// bool Copy(long ind)
-// {
-// 	prevIDs[ind] = IDs[ind];
-// 	return true;
-// }
-// void connectedComp(const Graph &graph)
-// {
-// 	long threshhold = 0; //set threshhold
-// 	VertexSubset frontier;
-// 	while(frontier.getVertexSubsetLength() > 0)
-// 	{
-// 		frontier = Interface::VertexMap(frontier, &Copy);
-// 		frontier = Interface::EdgeMap(graph, frontier, &CCUpdate, &Copy, threshhold);
-// 	}
-// }
+
+
+//Connected Components
+bool CCUpdate(long s, long d)
+{
+	long origId = IDs[d];
+	if(writeMin(&IDs[d], IDs[s]))
+		return (origId == prevIDs[d]);
+	return false;
+}
+bool Copy(long ind)
+{
+	prevIDs[ind] = IDs[ind];
+	return true;
+}
+
+
+void connectedComp(const Graph &graph, int threadCount)
+{
+	long size = graph.getNumberVertices();
+	IDs.resize(size);
+	prevIDs.resize(size);
+	VertexSubset frontier;
+	for(int i = 0; i < IDs.size(); i++)
+	{
+		IDs[i] = i;
+		prevIDs[i] = i;
+		frontier.getVertexSubset().push_back(i);
+	}
+		
+	long threshhold = 0; //set threshhold
+	while(frontier.getVertexSubsetLength() > 0)
+	{
+		frontier = Interface::VertexMap(frontier, &Copy, threadCount);
+		frontier = Interface::EdgeMap(graph, frontier, &CCUpdate, &Copy, threshhold, threadCount);
+	}
+}
+
+bool CCUpdate_s(long s, long d)
+{
+	long origId = IDs_s[d];
+	if(writeMin(&IDs_s[d], IDs_s[s]))
+		return (origId == prevIDs_s[d]);
+	return false;
+}
+bool Copy_s(long ind)
+{
+	prevIDs_s[ind] = IDs_s[ind];
+	return true;
+}
+
+void connectedComp_s(const Graph &graph)
+{
+	long size = graph.getNumberVertices();
+	IDs_s.resize(size);
+	prevIDs_s.resize(size);
+	VertexSubset frontier;
+	for(int i = 0; i < IDs_s.size(); i++)
+	{
+		IDs_s[i] = i;
+		prevIDs_s[i] = i;
+		frontier.getVertexSubset().push_back(i);
+	}
+	long threshhold = 0; //set threshhold
+	
+	while(frontier.getVertexSubsetLength() > 0)
+	{
+		frontier = Interface::VertexMap(frontier, &Copy_s);
+		frontier = Interface::EdgeMap(graph, frontier, &CCUpdate_s, &Copy_s, threshhold);
+	}
+}
 
 
 
@@ -238,8 +316,8 @@ bool bellmanFord_s(const Graph &graph, long root)
 	while (frontier.getVertexSubsetLength() > 0 && round < size)
 	{
 		round += 1;
-		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate_s, &bfReset_s,threshhold);
-		frontier = Interface::VertexMap(frontier, &bfReset_s);
+		frontier = Interface::EdgeMap_t(graph, frontier, &bfUpdate_s, &bfReset_s,threshhold);
+		frontier = Interface::VertexMap_t(frontier, &bfReset_s);
 	}
 	if(round == size)
 	{
@@ -285,6 +363,36 @@ bool bellmanFord(const Graph &graph, long root, int threadsCount)
 		round += 1;
 		frontier = Interface::EdgeMap(graph, frontier, &bfUpdate, &bfReset, threshhold, threadsCount);
 		frontier = Interface::VertexMap(frontier, &bfReset, 1);
+	}
+	if(round == size)
+	{
+		std::cout<<"Encountered a negative cycle\n";
+		return true;
+	}
+	return false;
+}
+
+
+bool bellmanFord_t(const Graph &graph, long root, int threadsCount)
+{
+	long threshhold = 0;
+	long size = graph.getNumberVertices();
+	SP.resize(size);
+	Visited.resize(size);
+	//TO DO: parallel
+	for(int i = 0; i < size; i++) //initialization
+	{	
+		SP[i] = std::numeric_limits<double>::max();
+		Visited[i] = 0;
+	}
+	SP[root] = 0;
+	VertexSubset frontier(root);
+	long round = 0;
+	while (frontier.getVertexSubsetLength() > 0 && round < size)
+	{
+		round += 1;
+		frontier = Interface::EdgeMap_t(graph, frontier, &bfUpdate, &bfReset, threshhold, threadsCount);
+		frontier = Interface::VertexMap_t(frontier, &bfReset, threadsCount);
 	}
 	if(round == size)
 	{

@@ -35,8 +35,11 @@ class Test
     void TestBFS(Graph& currGraph, long root);
     bool CompareSPs(Graph &g, std::deque<double> &SP, std::deque<double> & SP_s);
     void TestBF(Graph& currGraph, long root);
+    void TestCriticalVsReduction(Graph& currGraph, long root);
+    void TestBFSCritical(Graph& currGraph, long root);
     //bool CompareLayers(long* layers, long* layers_s);
-    //bool CompareParents(std::deque<std::atomic<long>> &parents, std::deque<long> &parents_s);
+    bool CompareIDs(Graph& currGraph, std::deque<long> IDs, std::deque<long> IDs_s);
+    void TestCC(Graph& currGraph);
     
 
     // void TestVertexMap(VertexSubset &vs, std::function<bool(long id)>);
@@ -79,6 +82,7 @@ class Test
     std::vector<double> p_BF_parTimes;
     std::vector<double> p_BF_speedUp;
     std::vector<bool> p_BF_comparisonSuccess;
+    std::vector<double> p_avgVectorSubsetSize;
 
     //!Array for short summary data:
     std::vector<int> g_threads;
@@ -94,6 +98,7 @@ class Test
     std::vector<long>b_sourceVertices;
     std::vector<int> b_speedUps;
     std::vector<bool> b_compSuccess;
+    std::vector<double> b_avgVectorSubsetSize;
 
 };
 

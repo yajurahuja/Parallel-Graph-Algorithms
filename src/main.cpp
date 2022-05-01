@@ -14,14 +14,14 @@ int main(int argc, char** argv)
 
     //!Hard coding all the file Names;
     std::vector<std::string> fileNames;
-//    fileNames.emplace_back("tinyEWDlong.txt");
-//    fileNames.emplace_back("tinyEWD.txt");
+    //fileNames.emplace_back("tinyEWDlong.txt");
+      //fileNames.emplace_back("tinyEWD.txt");
     //fileNames.emplace_back("BFtest.txt");
-//    fileNames.emplace_back("mediumEWD.txt");
-      fileNames.emplace_back("largeEWD.txt");
-//    fileNames.emplace_back("1000EWD.txt");
+    //fileNames.emplace_back("mediumEWD.txt");
+    fileNames.emplace_back("largeEWD.txt");
+//   fileNames.emplace_back("1000EWD.txt");
     //fileNames.emplace_back("10000EWD.txt");
-
+    //fileNames.emplace_back("email-Eu-core.txt");
     //!Getting the current path
     auto currPath = std::filesystem::current_path().string();
 
@@ -50,9 +50,10 @@ int main(int argc, char** argv)
 
             std::string fullFilePath = currPath + currFileNameAppended; //!This is concatinating the strings, for the path
             Graph currGraph(fullFilePath);  //!This is creating the graph
-
+            std::cout<<"Graph "<<currFileName<<" has been loaded"<<std::endl;
             Test test(currPath, currFileName);
-            test.DoTestingOnThisGraph(currGraph);
+            //test.DoTestingOnThisGraph(currGraph);
+            test.TestCC(currGraph);
 
 //            std::cout << "Testing works" << std::endl; 
 
